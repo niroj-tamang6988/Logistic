@@ -139,7 +139,6 @@ const Login = ({ setUser }) => {
           >
             <option value="vendor">Vendor</option>
             <option value="rider">Rider</option>
-            <option value="admin">Admin</option>
           </select>
         )}
         
