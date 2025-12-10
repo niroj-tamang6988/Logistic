@@ -19,7 +19,7 @@ const Login = ({ setUser }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const endpoint = isLogin ? 'http://localhost:5001/api/login' : 'http://localhost:5001/api/register';
+      const endpoint = isLogin ? 'https://logistic-backend-eight.vercel.app/api/login' : 'https://logistic-backend-eight.vercel.app/api/register';
       const data = isLogin ? { email: formData.email, password: formData.password } : formData;
       
       const response = await fetch(endpoint, {
