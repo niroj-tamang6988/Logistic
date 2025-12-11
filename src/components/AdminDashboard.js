@@ -10,14 +10,8 @@ const toNepaliDate = (adDate) => {
     const day = date.getDate();
     
     // Convert to Bikram Sambat (approximate)
-    const bsYear = year + 56;
-    let bsMonth = month + 8;
-    
-    if (bsMonth > 12) {
-      bsMonth -= 12;
-    }
-    
-    return `${bsYear}/${String(bsMonth).padStart(2, '0')}/${String(day).padStart(2, '0')}`;
+    const bsYear = year;
+    return `${bsYear}/${String(month).padStart(2, '0')}/${String(day).padStart(2, '0')}`;
   } catch (error) {
     return 'N/A';
   }
@@ -64,7 +58,7 @@ const AdminDashboard = () => {
 
   const fetchParcels = async () => {
     try {
-      const response = await fetch('https://logistic-backend-eight.vercel.app/api/parcels', {
+      const response = await fetch('http://localhost:5001/api/parcels', {
         headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
       });
       const data = await response.json();
@@ -77,7 +71,7 @@ const AdminDashboard = () => {
 
   const fetchRiders = async () => {
     try {
-      const response = await fetch('https://logistic-backend-eight.vercel.app/api/riders', {
+      const response = await fetch('http://localhost:5001/api/riders', {
         headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
       });
       const data = await response.json();
@@ -90,7 +84,7 @@ const AdminDashboard = () => {
 
   const fetchStats = async () => {
     try {
-      const response = await fetch('https://logistic-backend-eight.vercel.app/api/stats', {
+      const response = await fetch('http://localhost:5001/api/stats', {
         headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
       });
       const data = await response.json();
@@ -103,7 +97,7 @@ const AdminDashboard = () => {
 
   const fetchUsers = async () => {
     try {
-      const response = await fetch('https://logistic-backend-eight.vercel.app/api/users', {
+      const response = await fetch('http://localhost:5001/api/users', {
         headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
       });
       const data = await response.json();
@@ -116,7 +110,7 @@ const AdminDashboard = () => {
 
   const fetchFinancialData = async () => {
     try {
-      const response = await fetch('https://logistic-backend-eight.vercel.app/api/financial-report', {
+      const response = await fetch('http://localhost:5001/api/financial-report', {
         headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
       });
       const data = await response.json();
@@ -129,7 +123,7 @@ const AdminDashboard = () => {
 
   const fetchDailyFinancialData = async () => {
     try {
-      const response = await fetch('https://logistic-backend-eight.vercel.app/api/financial-report-daily', {
+      const response = await fetch('http://localhost:5001/api/financial-report-daily', {
         headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
       });
       const data = await response.json();
@@ -143,7 +137,7 @@ const AdminDashboard = () => {
   const fetchVendorReport = async () => {
     try {
       console.log('Fetching vendor report...');
-      const response = await fetch('https://logistic-backend-eight.vercel.app/api/vendor-report', {
+      const response = await fetch('http://localhost:5001/api/vendor-report', {
         headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
       });
       const data = await response.json();
@@ -157,7 +151,7 @@ const AdminDashboard = () => {
 
   const fetchRiderReports = async () => {
     try {
-      const response = await fetch('https://logistic-backend-eight.vercel.app/api/rider-reports', {
+      const response = await fetch('http://localhost:5001/api/rider-reports', {
         headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
       });
       const data = await response.json();
@@ -170,7 +164,7 @@ const AdminDashboard = () => {
 
   const fetchRiderDaybook = async (riderId) => {
     try {
-      const response = await fetch(`https://logistic-backend-eight.vercel.app/api/rider-daybook-details/${riderId}`, {
+      const response = await fetch(`http://localhost:5001/api/rider-daybook-details/${riderId}`, {
         headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
       });
       const data = await response.json();
@@ -185,7 +179,7 @@ const AdminDashboard = () => {
     if (!window.confirm('Are you sure you want to delete this user?')) return;
     
     try {
-      const response = await fetch(`https://logistic-backend-eight.vercel.app/api/users/${userId}`, {
+      const response = await fetch(`http://localhost:5001/api/users/${userId}`, {
         method: 'DELETE',
         headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
       });
@@ -203,7 +197,7 @@ const AdminDashboard = () => {
 
   const approveUser = async (userId) => {
     try {
-      const response = await fetch(`https://logistic-backend-eight.vercel.app/api/users/${userId}/approve`, {
+      const response = await fetch(`http://localhost:5001/api/users/${userId}/approve`, {
         method: 'PUT',
         headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
       });
@@ -235,7 +229,7 @@ const AdminDashboard = () => {
 
   const assignRider = async (parcelId, riderId) => {
     try {
-      const response = await fetch(`https://logistic-backend-eight.vercel.app/api/parcels/${parcelId}/assign`, {
+      const response = await fetch(`http://localhost:5001/api/parcels/${parcelId}/assign`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -318,7 +312,7 @@ const AdminDashboard = () => {
       
       <div style={styles.statsGrid}>
         <div style={styles.statCard}>
-          <h3>{getStatCount('pending') + getStatCount('assigned') + getStatCount('delivered') + getStatCount('not_delivered')}</h3>
+          <h3>{getStatCount('placed') + getStatCount('assigned') + getStatCount('delivered') + getStatCount('not_delivered')}</h3>
           <p>Total Parcels</p>
         </div>
         <div style={styles.statCard}>
@@ -594,6 +588,8 @@ const AdminDashboard = () => {
         </div>
       )}
       
+
+      
       {activeTab === 'riderReports' && (
         <div>
           <h3 style={{ marginBottom: '1rem' }}>Rider Reports & Details</h3>
@@ -658,7 +654,6 @@ const AdminDashboard = () => {
                         <th style={styles.th}>Date</th>
                         <th style={styles.th}>KM</th>
                         <th style={styles.th}>Parcels</th>
-                        <th style={styles.th}>Fuel Cost</th>
                         <th style={styles.th}>Notes</th>
                       </tr>
                     </thead>

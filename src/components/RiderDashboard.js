@@ -73,7 +73,7 @@ const RiderDashboard = () => {
 
   const fetchParcels = async () => {
     try {
-      const response = await fetch('https://logistic-backend-eight.vercel.app/api/parcels', {
+      const response = await fetch('http://localhost:5001/api/parcels', {
         headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
       });
       const data = await response.json();
@@ -86,7 +86,7 @@ const RiderDashboard = () => {
 
   const fetchProfile = async () => {
     try {
-      const response = await fetch('https://logistic-backend-eight.vercel.app/api/rider-profile', {
+      const response = await fetch('http://localhost:5001/api/rider-profile', {
         headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
       });
       const data = await response.json();
@@ -104,7 +104,7 @@ const RiderDashboard = () => {
 
   const fetchDaybook = async () => {
     try {
-      const response = await fetch('https://logistic-backend-eight.vercel.app/api/rider-daybook', {
+      const response = await fetch('http://localhost:5001/api/rider-daybook', {
         headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
       });
       const data = await response.json();
@@ -117,7 +117,7 @@ const RiderDashboard = () => {
 
   const fetchDaybookSummary = async () => {
     try {
-      const response = await fetch('https://logistic-backend-eight.vercel.app/api/rider-daybook-summary', {
+      const response = await fetch('http://localhost:5001/api/rider-daybook-summary', {
         headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
       });
       const data = await response.json();
@@ -130,7 +130,7 @@ const RiderDashboard = () => {
 
   const fetchMonthlyReport = async () => {
     try {
-      const response = await fetch('https://logistic-backend-eight.vercel.app/api/rider-daybook-monthly', {
+      const response = await fetch('http://localhost:5001/api/rider-daybook-monthly', {
         headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
       });
       const data = await response.json();
@@ -154,7 +154,7 @@ const RiderDashboard = () => {
   const saveDaybookEntry = async (e) => {
     e.preventDefault();
     try {
-      const response = await fetch('https://logistic-backend-eight.vercel.app/api/rider-daybook', {
+      const response = await fetch('http://localhost:5001/api/rider-daybook', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -203,7 +203,7 @@ const RiderDashboard = () => {
     formData.append('photo', selectedFile);
     
     try {
-      const response = await fetch('https://logistic-backend-eight.vercel.app/api/upload-photo', {
+      const response = await fetch('http://localhost:5001/api/upload-photo', {
         method: 'POST',
         headers: {
           Authorization: `Bearer ${localStorage.getItem('token')}`
@@ -242,7 +242,7 @@ const RiderDashboard = () => {
     }
     
     try {
-      const response = await fetch('https://logistic-backend-eight.vercel.app/api/rider-profile', {
+      const response = await fetch('http://localhost:5001/api/rider-profile', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -267,7 +267,7 @@ const RiderDashboard = () => {
   const updateDeliveryStatus = async (e) => {
     e.preventDefault();
     try {
-      const response = await fetch(`https://logistic-backend-eight.vercel.app/api/parcels/${selectedParcel.id}/delivery`, {
+      const response = await fetch(`http://localhost:5001/api/parcels/${selectedParcel.id}/delivery`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -519,7 +519,7 @@ const RiderDashboard = () => {
                   <div style={{ marginTop: '0.5rem' }}>
                     {profile.photo_url ? (
                       <img 
-                        src={`https://logistic-backend-eight.vercel.app${profile.photo_url}`} 
+                        src={`http://localhost:5001${profile.photo_url}`} 
                         alt="Profile" 
                         style={{ width: '150px', height: '150px', borderRadius: '8px', objectFit: 'cover', border: '2px solid #ddd' }}
                       />
@@ -569,7 +569,7 @@ const RiderDashboard = () => {
                 {profile.photo_url && (
                   <div style={{ marginTop: '0.5rem' }}>
                     <img 
-                      src={`https://logistic-backend-eight.vercel.app${profile.photo_url}`} 
+                      src={`http://localhost:5001${profile.photo_url}`} 
                       alt="Current profile" 
                       style={{ width: '100px', height: '100px', borderRadius: '50%', objectFit: 'cover' }}
                     />
