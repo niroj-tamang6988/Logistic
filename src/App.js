@@ -23,7 +23,7 @@ function App() {
 
   const fetchRiderProfile = async (token) => {
     try {
-      const response = await fetch(`${process.env.REACT_APP_API_URL || 'http://localhost:5001'}/api/rider-profile`, {
+      const response = await fetch(`https://logistic-backend-eight.vercel.app/api/rider-profile`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       const data = await response.json();
@@ -60,7 +60,7 @@ function App() {
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
             {user.role === 'rider' && riderProfile?.photo_url ? (
               <img 
-                src={`${process.env.REACT_APP_API_URL || 'http://localhost:5001'}${riderProfile.photo_url}`} 
+                src={`https://logistic-backend-eight.vercel.app${riderProfile.photo_url}`} 
                 alt="Profile" 
                 style={{ width: '40px', height: '40px', borderRadius: '50%', objectFit: 'cover', border: '2px solid white' }}
               />
