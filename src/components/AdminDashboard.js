@@ -58,7 +58,7 @@ const AdminDashboard = () => {
 
   const fetchParcels = async () => {
     try {
-      const response = await fetch('http://localhost:5001/api/parcels', {
+      const response = await fetch('https://logistic-backend-eight.vercel.app/api/parcels', {
         headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
       });
       const data = await response.json();
@@ -71,7 +71,7 @@ const AdminDashboard = () => {
 
   const fetchRiders = async () => {
     try {
-      const response = await fetch('http://localhost:5001/api/riders', {
+      const response = await fetch('https://logistic-backend-eight.vercel.app/api/riders', {
         headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
       });
       const data = await response.json();
@@ -84,7 +84,7 @@ const AdminDashboard = () => {
 
   const fetchStats = async () => {
     try {
-      const response = await fetch('http://localhost:5001/api/stats', {
+      const response = await fetch('https://logistic-backend-eight.vercel.app/api/stats', {
         headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
       });
       const data = await response.json();
@@ -97,7 +97,7 @@ const AdminDashboard = () => {
 
   const fetchUsers = async () => {
     try {
-      const response = await fetch('http://localhost:5001/api/users', {
+      const response = await fetch('https://logistic-backend-eight.vercel.app/api/users', {
         headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
       });
       const data = await response.json();
@@ -110,7 +110,7 @@ const AdminDashboard = () => {
 
   const fetchFinancialData = async () => {
     try {
-      const response = await fetch('http://localhost:5001/api/financial-report', {
+      const response = await fetch('https://logistic-backend-eight.vercel.app/api/financial-report', {
         headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
       });
       const data = await response.json();
@@ -123,7 +123,7 @@ const AdminDashboard = () => {
 
   const fetchDailyFinancialData = async () => {
     try {
-      const response = await fetch('http://localhost:5001/api/financial-report-daily', {
+      const response = await fetch('https://logistic-backend-eight.vercel.app/api/financial-report-daily', {
         headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
       });
       const data = await response.json();
@@ -137,7 +137,7 @@ const AdminDashboard = () => {
   const fetchVendorReport = async () => {
     try {
       console.log('Fetching vendor report...');
-      const response = await fetch('http://localhost:5001/api/vendor-report', {
+      const response = await fetch('https://logistic-backend-eight.vercel.app/api/vendor-report', {
         headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
       });
       const data = await response.json();
@@ -151,7 +151,7 @@ const AdminDashboard = () => {
 
   const fetchRiderReports = async () => {
     try {
-      const response = await fetch('http://localhost:5001/api/rider-reports', {
+      const response = await fetch('https://logistic-backend-eight.vercel.app/api/rider-reports', {
         headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
       });
       const data = await response.json();
@@ -164,7 +164,7 @@ const AdminDashboard = () => {
 
   const fetchRiderDaybook = async (riderId) => {
     try {
-      const response = await fetch(`http://localhost:5001/api/rider-daybook-details/${riderId}`, {
+      const response = await fetch(`https://logistic-backend-eight.vercel.app/api/rider-daybook-details/${riderId}`, {
         headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
       });
       const data = await response.json();
@@ -179,7 +179,7 @@ const AdminDashboard = () => {
     if (!window.confirm('Are you sure you want to delete this user?')) return;
     
     try {
-      const response = await fetch(`http://localhost:5001/api/users/${userId}`, {
+      const response = await fetch(`https://logistic-backend-eight.vercel.app/api/users/${userId}`, {
         method: 'DELETE',
         headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
       });
@@ -197,7 +197,7 @@ const AdminDashboard = () => {
 
   const approveUser = async (userId) => {
     try {
-      const response = await fetch(`http://localhost:5001/api/users/${userId}/approve`, {
+      const response = await fetch(`https://logistic-backend-eight.vercel.app/api/users/${userId}/approve`, {
         method: 'PUT',
         headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
       });
@@ -229,7 +229,7 @@ const AdminDashboard = () => {
 
   const assignRider = async (parcelId, riderId) => {
     try {
-      const response = await fetch(`http://localhost:5001/api/parcels/${parcelId}/assign`, {
+      const response = await fetch(`https://logistic-backend-eight.vercel.app/api/parcels/${parcelId}/assign`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
