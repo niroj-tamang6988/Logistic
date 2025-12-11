@@ -5,16 +5,17 @@ import { useToast } from './Toast';
 const toNepaliDate = (adDate) => {
   try {
     const date = new Date(adDate);
-    const year = date.getFullYear();
-    const month = date.getMonth() + 1;
+    let year = date.getFullYear();
+    let month = date.getMonth() + 1;
     const day = date.getDate();
     
     // Convert to Bikram Sambat (approximate)
-    const bsYear = year + 56;
+    let bsYear = year + 57;
     let bsMonth = month + 8;
     
     if (bsMonth > 12) {
       bsMonth -= 12;
+      bsYear += 1;
     }
     
     return `${bsYear}/${String(bsMonth).padStart(2, '0')}/${String(day).padStart(2, '0')}`;
