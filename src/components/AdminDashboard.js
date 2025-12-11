@@ -318,7 +318,7 @@ const AdminDashboard = () => {
       
       <div style={styles.statsGrid}>
         <div style={styles.statCard}>
-          <h3>{getStatCount('placed') + getStatCount('assigned') + getStatCount('delivered') + getStatCount('not_delivered')}</h3>
+          <h3>{getStatCount('pending') + getStatCount('assigned') + getStatCount('delivered') + getStatCount('not_delivered')}</h3>
           <p>Total Parcels</p>
         </div>
         <div style={styles.statCard}>
@@ -594,8 +594,6 @@ const AdminDashboard = () => {
         </div>
       )}
       
-
-      
       {activeTab === 'riderReports' && (
         <div>
           <h3 style={{ marginBottom: '1rem' }}>Rider Reports & Details</h3>
@@ -660,6 +658,7 @@ const AdminDashboard = () => {
                         <th style={styles.th}>Date</th>
                         <th style={styles.th}>KM</th>
                         <th style={styles.th}>Parcels</th>
+                        <th style={styles.th}>Fuel Cost</th>
                         <th style={styles.th}>Notes</th>
                       </tr>
                     </thead>

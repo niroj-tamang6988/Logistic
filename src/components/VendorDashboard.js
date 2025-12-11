@@ -193,7 +193,7 @@ const VendorDashboard = () => {
       
       <div style={styles.statsGrid}>
         <div style={styles.statCard}>
-          <h3>{getStatCount('placed') + getStatCount('assigned') + getStatCount('delivered') + getStatCount('not_delivered')}</h3>
+          <h3>{getStatCount('pending') + getStatCount('assigned') + getStatCount('delivered') + getStatCount('not_delivered')}</h3>
           <p>Total Parcels</p>
         </div>
         <div style={styles.statCard}>
@@ -205,7 +205,7 @@ const VendorDashboard = () => {
           <p>Not Delivered</p>
         </div>
         <div style={styles.statCard}>
-          <h3>{getStatCount('placed') + getStatCount('assigned')}</h3>
+          <h3>{getStatCount('pending') + getStatCount('assigned')}</h3>
           <p>In Progress</p>
         </div>
       </div>
@@ -333,7 +333,7 @@ const VendorDashboard = () => {
               <p>Pending COD</p>
             </div>
             <div style={styles.statCard}>
-              <h3>NPR {formatCurrency(getFinancialData('not delivered'))}</h3>
+              <h3>NPR {formatCurrency(getFinancialData('not_delivered'))}</h3>
               <p>Failed Delivery COD</p>
             </div>
           </div>
@@ -354,9 +354,9 @@ const VendorDashboard = () => {
                       padding: '0.25rem 0.5rem',
                       borderRadius: '4px',
                       background: item.status === 'delivered' ? '#d4edda' : 
-                                item.status === 'not delivered' ? '#f8d7da' : '#fff3cd',
+                                item.status === 'not_delivered' ? '#f8d7da' : '#fff3cd',
                       color: item.status === 'delivered' ? '#155724' : 
-                             item.status === 'not delivered' ? '#721c24' : '#856404'
+                             item.status === 'not_delivered' ? '#721c24' : '#856404'
                     }}>
                       {item.status}
                     </span>
@@ -387,9 +387,9 @@ const VendorDashboard = () => {
                       padding: '0.25rem 0.5rem',
                       borderRadius: '4px',
                       background: item.status === 'delivered' ? '#d4edda' : 
-                                item.status === 'not delivered' ? '#f8d7da' : '#fff3cd',
+                                item.status === 'not_delivered' ? '#f8d7da' : '#fff3cd',
                       color: item.status === 'delivered' ? '#155724' : 
-                             item.status === 'not delivered' ? '#721c24' : '#856404'
+                             item.status === 'not_delivered' ? '#721c24' : '#856404'
                     }}>
                       {item.status}
                     </span>
