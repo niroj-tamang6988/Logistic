@@ -10,11 +10,13 @@ const toNepaliDate = (adDate) => {
     const day = date.getDate();
     
     // Convert to Bikram Sambat (approximate)
-    let bsYear = year + 57;
+    // For dates after April, add 57 years; before April, add 56 years
+    let bsYear = month >= 4 ? year + 57 : year + 56;
     let bsMonth = month + 8;
     
     if (bsMonth > 12) {
       bsMonth -= 12;
+    } else if (month < 4) {
       bsYear += 1;
     }
     
