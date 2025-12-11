@@ -10,8 +10,14 @@ const toNepaliDate = (adDate) => {
     const day = date.getDate();
     
     // Convert to Bikram Sambat (approximate)
-    const bsYear = year;
-    return `${bsYear}/${String(month).padStart(2, '0')}/${String(day).padStart(2, '0')}`;
+    const bsYear = year + 57;
+    let bsMonth = month + 8;
+    
+    if (bsMonth > 12) {
+      bsMonth -= 12;
+    }
+    
+    return `${bsYear}/${String(bsMonth).padStart(2, '0')}/${String(day).padStart(2, '0')}`;
   } catch (error) {
     return 'N/A';
   }
