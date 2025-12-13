@@ -5,19 +5,24 @@ import { useToast } from './Toast';
 const toNepaliDate = (adDate) => {
   try {
     const date = new Date(adDate);
-    const year = date.getFullYear();
-    const month = date.getMonth() + 1;
-    const day = date.getDate();
+    let year = date.getFullYear();
+    let month = date.getMonth() + 1;
+    let day = date.getDate();
     
     // Convert to Bikram Sambat (approximate)
-    const bsYear = year + 56;
-    let bsMonth = month + 8;
+    // December 11, 2024 = 2082/08/25, so December = month 8 in BS
+    let bsYear = year + 57;
+    let bsMonth = month - 4; // December (12) - 4 = 8
     
-    if (bsMonth > 12) {
-      bsMonth -= 12;
+    // Adjust day: Dec 11 = BS day 25, so add 14 days
+    let bsDay = day + 14;
+    
+    if (bsMonth <= 0) {
+      bsMonth += 12;
+      bsYear -= 1;
     }
     
-    return `${bsYear}/${String(bsMonth).padStart(2, '0')}/${String(day).padStart(2, '0')}`;
+    return `${bsYear}/${String(bsMonth).padStart(2, '0')}/${String(bsDay).padStart(2, '0')}`;
   } catch (error) {
     return 'N/A';
   }
@@ -73,7 +78,7 @@ const RiderDashboard = () => {
 
   const fetchParcels = async () => {
     try {
-      const response = await fetch('http://localhost:5001/api/parcels', {
+      const response = await fetch('https://logistic-backend-eight.vercel.app/api/parcels', {
         headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
       });
       const data = await response.json();
@@ -267,7 +272,7 @@ const RiderDashboard = () => {
   const updateDeliveryStatus = async (e) => {
     e.preventDefault();
     try {
-      const response = await fetch(`http://localhost:5001/api/parcels/${selectedParcel.id}/delivery`, {
+      const response = await fetch(`https://logistic-backend-eight.vercel.app/api/parcels/${selectedParcel.id}/delivery`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
