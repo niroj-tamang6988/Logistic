@@ -43,6 +43,17 @@ const AdminDashboard = () => {
   const [activeTab, setActiveTab] = useState('parcels');
   const [profile, setProfile] = useState({ name: '', email: '' });
   const [isEditingProfile, setIsEditingProfile] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [editingParcel, setEditingParcel] = useState(null);
+  const [staffActivities, setStaffActivities] = useState([]);
+  const [showActivityForm, setShowActivityForm] = useState(false);
+  const [activityForm, setActivityForm] = useState({
+    staff_id: '',
+    activity_type: 'advance',
+    amount: '',
+    reason: '',
+    notes: ''
+  });
 
   useEffect(() => {
     fetchParcels();
@@ -54,6 +65,9 @@ const AdminDashboard = () => {
     fetchVendorReport();
     fetchRiderReports();
     fetchProfile();
+    if (activeTab === 'activities') {
+      fetchStaffActivities();
+    }
   }, []);
 
   const fetchProfile = async () => {
@@ -238,6 +252,44 @@ const AdminDashboard = () => {
     return num % 1 === 0 ? num.toString() : num.toFixed(2);
   };
 
+  const fetchStaffActivities = async () => {
+    try {
+      const response = await fetch('https://logistic-backend-eight.vercel.app/api/staff-activities', {
+        headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+      });
+      const data = await response.json();
+      setStaffActivities(Array.isArray(data) ? data : []);
+    } catch (error) {
+      console.error('Error fetching staff activities:', error);
+      setStaffActivities([]);
+    }
+  };
+
+  const saveStaffActivity = async (e) => {
+    e.preventDefault();
+    try {
+      const response = await fetch('https://logistic-backend-eight.vercel.app/api/staff-activities', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${localStorage.getItem('token')}`
+        },
+        body: JSON.stringify(activityForm)
+      });
+      
+      if (response.ok) {
+        setActivityForm({ staff_id: '', activity_type: 'advance', amount: '', reason: '', notes: '' });
+        setShowActivityForm(false);
+        fetchStaffActivities();
+        showToast('Staff activity recorded successfully!');
+      } else {
+        showToast('Error recording staff activity', 'error');
+      }
+    } catch (error) {
+      showToast('Error recording staff activity', 'error');
+    }
+  };
+
   const assignRider = async (parcelId, riderId) => {
     try {
       const response = await fetch(`https://logistic-backend-eight.vercel.app/api/parcels/${parcelId}/assign`, {
@@ -250,14 +302,15 @@ const AdminDashboard = () => {
       });
       
       if (response.ok) {
+        setEditingParcel(null);
         fetchParcels();
         fetchStats();
-        showToast('Rider assigned successfully!');
+        showToast('Parcel updated successfully!');
       } else {
-        showToast('Error assigning rider', 'error');
+        showToast('Error updating parcel', 'error');
       }
     } catch (error) {
-      showToast('Error assigning rider', 'error');
+      showToast('Error updating parcel', 'error');
     }
   };
 
@@ -314,6 +367,12 @@ const AdminDashboard = () => {
           Rider Reports
         </button>
         <button 
+          onClick={() => setActiveTab('activities')} 
+          style={{...styles.button, background: activeTab === 'activities' ? '#007bff' : '#6c757d', marginRight: '1rem'}}
+        >
+          Staff Activities
+        </button>
+        <button 
           onClick={() => setActiveTab('profile')} 
           style={{...styles.button, background: activeTab === 'profile' ? '#007bff' : '#6c757d'}}
         >
@@ -341,6 +400,17 @@ const AdminDashboard = () => {
       </div>
 
       {activeTab === 'parcels' && (
+      <>
+      <div style={{ marginBottom: '1rem' }}>
+        <input
+          type="text"
+          placeholder="Search by ID, vendor, recipient, phone, or address..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          style={{...styles.select, maxWidth: '400px', padding: '0.75rem'}}
+        />
+      </div>
+      
       <table style={styles.table}>
         <thead>
           <tr>
@@ -357,7 +427,13 @@ const AdminDashboard = () => {
           </tr>
         </thead>
         <tbody>
-          {parcels.map(parcel => (
+          {parcels.filter(parcel => 
+            parcel.id.toString().includes(searchTerm.toLowerCase()) ||
+            (parcel.vendor_name && parcel.vendor_name.toLowerCase().includes(searchTerm.toLowerCase())) ||
+            parcel.recipient_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            parcel.recipient_phone.includes(searchTerm) ||
+            (parcel.address && parcel.address.toLowerCase().includes(searchTerm.toLowerCase()))
+          ).map(parcel => (
             <tr key={parcel.id}>
               <td style={styles.td}>{parcel.id}</td>
               <td style={styles.td}>{toNepaliDate(parcel.created_at)}</td>
@@ -380,27 +456,59 @@ const AdminDashboard = () => {
               </td>
               <td style={styles.td}>{parcel.rider_name || 'Not assigned'}</td>
               <td style={styles.td}>
-                {parcel.status === 'pending' && (
-                  <select 
-                    style={styles.select}
-                    onChange={(e) => {
-                      if (e.target.value) {
-                        assignRider(parcel.id, e.target.value);
-                        e.target.value = '';
-                      }
-                    }}
-                  >
-                    <option value="">Select Rider</option>
-                    {riders.map(rider => (
-                      <option key={rider.id} value={rider.id}>{rider.name}</option>
-                    ))}
-                  </select>
+                {editingParcel === parcel.id ? (
+                  <div style={{ display: 'flex', gap: '0.5rem' }}>
+                    <select 
+                      style={styles.select}
+                      defaultValue={parcel.assigned_rider_id || ''}
+                      onChange={(e) => assignRider(parcel.id, e.target.value)}
+                    >
+                      <option value="">Unassign</option>
+                      {riders.map(rider => (
+                        <option key={rider.id} value={rider.id}>{rider.name}</option>
+                      ))}
+                    </select>
+                    <button 
+                      onClick={() => setEditingParcel(null)}
+                      style={{...styles.select, background: '#6c757d', color: 'white', border: 'none', cursor: 'pointer'}}
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                ) : (
+                  <div style={{ display: 'flex', gap: '0.5rem' }}>
+                    {parcel.status === 'pending' && (
+                      <select 
+                        style={styles.select}
+                        onChange={(e) => {
+                          if (e.target.value) {
+                            assignRider(parcel.id, e.target.value);
+                            e.target.value = '';
+                          }
+                        }}
+                      >
+                        <option value="">Select Rider</option>
+                        {riders.map(rider => (
+                          <option key={rider.id} value={rider.id}>{rider.name}</option>
+                        ))}
+                      </select>
+                    )}
+                    {(parcel.status === 'assigned' || parcel.status === 'delivered' || parcel.status === 'not_delivered') && (
+                      <button 
+                        onClick={() => setEditingParcel(parcel.id)}
+                        style={{...styles.select, background: '#007bff', color: 'white', border: 'none', cursor: 'pointer'}}
+                      >
+                        Edit
+                      </button>
+                    )}
+                  </div>
                 )}
               </td>
             </tr>
           ))}
         </tbody>
       </table>
+      </>
       )}
       
       {activeTab === 'users' && (
@@ -697,6 +805,122 @@ const AdminDashboard = () => {
               No rider data found.
             </div>
           )}
+        </div>
+      )}
+      
+      {activeTab === 'activities' && (
+        <div>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
+            <h3>Staff Activities</h3>
+            <button 
+              onClick={() => setShowActivityForm(!showActivityForm)}
+              style={{...styles.button, background: '#28a745'}}
+            >
+              {showActivityForm ? 'Cancel' : 'Add Activity'}
+            </button>
+          </div>
+          
+          {showActivityForm && (
+            <div style={{ background: 'white', padding: '2rem', borderRadius: '8px', boxShadow: '0 4px 12px rgba(0,0,0,0.1)', marginBottom: '2rem' }}>
+              <h4>Record Staff Activity</h4>
+              <form onSubmit={saveStaffActivity} style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem' }}>
+                <select
+                  value={activityForm.staff_id}
+                  onChange={(e) => setActivityForm({...activityForm, staff_id: e.target.value})}
+                  style={styles.select}
+                  required
+                >
+                  <option value="">Select Staff</option>
+                  {users.filter(u => u.role === 'rider').map(user => (
+                    <option key={user.id} value={user.id}>{user.name}</option>
+                  ))}
+                </select>
+                
+                <select
+                  value={activityForm.activity_type}
+                  onChange={(e) => setActivityForm({...activityForm, activity_type: e.target.value})}
+                  style={styles.select}
+                >
+                  <option value="advance">Advance Payment</option>
+                  <option value="fuel">Fuel Allowance</option>
+                  <option value="bonus">Bonus</option>
+                  <option value="deduction">Deduction</option>
+                  <option value="other">Other</option>
+                </select>
+                
+                <input
+                  type="number"
+                  step="0.01"
+                  placeholder="Amount (NPR)"
+                  value={activityForm.amount}
+                  onChange={(e) => setActivityForm({...activityForm, amount: e.target.value})}
+                  style={styles.select}
+                  required
+                />
+                
+                <input
+                  type="text"
+                  placeholder="Reason"
+                  value={activityForm.reason}
+                  onChange={(e) => setActivityForm({...activityForm, reason: e.target.value})}
+                  style={styles.select}
+                  required
+                />
+                
+                <textarea
+                  placeholder="Notes (optional)"
+                  value={activityForm.notes}
+                  onChange={(e) => setActivityForm({...activityForm, notes: e.target.value})}
+                  style={{...styles.select, gridColumn: 'span 2', minHeight: '60px'}}
+                />
+                
+                <button type="submit" style={{...styles.button, background: '#28a745'}}>
+                  Record Activity
+                </button>
+              </form>
+            </div>
+          )}
+          
+          <table style={styles.table}>
+            <thead>
+              <tr>
+                <th style={styles.th}>Date</th>
+                <th style={styles.th}>Staff</th>
+                <th style={styles.th}>Type</th>
+                <th style={styles.th}>Amount</th>
+                <th style={styles.th}>Reason</th>
+                <th style={styles.th}>Notes</th>
+              </tr>
+            </thead>
+            <tbody>
+              {staffActivities.map(activity => (
+                <tr key={activity.id}>
+                  <td style={styles.td}>{toNepaliDate(activity.created_at)}</td>
+                  <td style={styles.td}>{activity.staff_name}</td>
+                  <td style={styles.td}>
+                    <span style={{
+                      padding: '0.25rem 0.5rem',
+                      borderRadius: '4px',
+                      background: activity.activity_type === 'deduction' ? '#f8d7da' : '#d4edda',
+                      color: activity.activity_type === 'deduction' ? '#721c24' : '#155724'
+                    }}>
+                      {activity.activity_type}
+                    </span>
+                  </td>
+                  <td style={styles.td}>NPR {formatCurrency(activity.amount)}</td>
+                  <td style={styles.td}>{activity.reason}</td>
+                  <td style={styles.td}>{activity.notes || '-'}</td>
+                </tr>
+              ))}
+              {staffActivities.length === 0 && (
+                <tr>
+                  <td colSpan="6" style={{...styles.td, textAlign: 'center', color: '#6c757d'}}>
+                    No staff activities recorded.
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
         </div>
       )}
       
