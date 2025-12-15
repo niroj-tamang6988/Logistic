@@ -34,7 +34,8 @@ const RiderDashboard = () => {
     const num = parseFloat(amount || 0);
     return num % 1 === 0 ? num.toString() : num.toFixed(2);
   };
-  const [parcels, setParcels] = useState([]);
+  const [parcels, setParcels] = useState({});
+  const [searchTerm, setSearchTerm] = useState('');
   const [selectedParcel, setSelectedParcel] = useState(null);
   const [deliveryStatus, setDeliveryStatus] = useState('delivered');
   const [comment, setComment] = useState('');
@@ -76,16 +77,19 @@ const RiderDashboard = () => {
     fetchProfile();
   }, []);
 
-  const fetchParcels = async () => {
+  const fetchParcels = async (search = '') => {
     try {
-      const response = await fetch('https://logistic-backend-v3.vercel.app/api/parcels', {
+      const url = search ? 
+        `https://logistic-backend-v3.vercel.app/api/parcels?search=${encodeURIComponent(search)}` :
+        'https://logistic-backend-v3.vercel.app/api/parcels';
+      const response = await fetch(url, {
         headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
       });
       const data = await response.json();
-      setParcels(Array.isArray(data) ? data : []);
+      setParcels(data || {});
     } catch (error) {
       console.error('Error fetching parcels:', error);
-      setParcels([]);
+      setParcels({});
     }
   };
 
@@ -288,7 +292,7 @@ const RiderDashboard = () => {
         setSelectedParcel(null);
         setComment('');
         setDeliveryStatus('delivered');
-        fetchParcels();
+        fetchParcels(searchTerm);
         showToast('Delivery status updated successfully!');
       } else {
         const errorData = await response.json();
@@ -320,9 +324,11 @@ const RiderDashboard = () => {
     textarea: { width: '100%', padding: '0.75rem', margin: '0.5rem 0', border: '1px solid #ced4da', borderRadius: '4px', minHeight: '100px', backgroundColor: '#f8f9fa' }
   };
 
-  const assignedParcels = parcels.filter(p => p.status === 'assigned');
-  const deliveredParcels = parcels.filter(p => p.status === 'delivered');
-  const notDeliveredParcels = parcels.filter(p => p.status === 'not_delivered');
+  // Get all parcels from grouped data
+  const allParcels = Object.values(parcels).flat();
+  const assignedParcels = allParcels.filter(p => p.status === 'assigned');
+  const deliveredParcels = allParcels.filter(p => p.status === 'delivered');
+  const notDeliveredParcels = allParcels.filter(p => p.status === 'not_delivered');
 
   return (
     <div style={styles.container}>
@@ -354,7 +360,7 @@ const RiderDashboard = () => {
       <>
       <div style={styles.statsGrid}>
         <div style={styles.statCard}>
-          <h3>{parcels.length}</h3>
+          <h3>{allParcels.length}</h3>
           <p>Total Assigned</p>
         </div>
         <div style={styles.statCard}>
@@ -371,62 +377,123 @@ const RiderDashboard = () => {
         </div>
       </div>
 
-      <table style={styles.table}>
-        <thead>
-          <tr>
-            <th style={styles.th}>ID</th>
-            <th style={styles.th}>Date</th>
-            <th style={styles.th}>Vendor</th>
-            <th style={styles.th}>Recipient</th>
-            <th style={styles.th}>Address</th>
-            <th style={styles.th}>Phone</th>
-            <th style={styles.th}>COD Amount</th>
-            <th style={styles.th}>Status</th>
-            <th style={styles.th}>Comment</th>
-            <th style={styles.th}>Action</th>
-          </tr>
-        </thead>
-        <tbody>
-          {parcels.map(parcel => (
-            <tr key={parcel.id}>
-              <td style={styles.td}>{parcel.id}</td>
-              <td style={styles.td}>{toNepaliDate(parcel.created_at)}</td>
-              <td style={styles.td}>{parcel.vendor_name}</td>
-              <td style={styles.td}>{parcel.recipient_name}</td>
-              <td style={styles.td}>{parcel.address}</td>
-              <td style={styles.td}>{parcel.recipient_phone}</td>
-              <td style={styles.td}>NPR {formatCurrency(parcel.cod_amount)}</td>
-              <td style={styles.td}>
-                <span style={{
-                  padding: '0.25rem 0.5rem',
-                  borderRadius: '4px',
-                  background: parcel.status === 'delivered' ? '#d4edda' : 
-                            parcel.status === 'not_delivered' ? '#f8d7da' : '#fff3cd',
-                  color: parcel.status === 'delivered' ? '#155724' : 
-                         parcel.status === 'not_delivered' ? '#721c24' : '#856404'
-                }}>
-                  {parcel.status}
-                </span>
-              </td>
-              <td style={styles.td}>{parcel.rider_comment || '-'}</td>
-              <td style={styles.td}>
-                {(parcel.status === 'assigned' || parcel.status === 'delivered' || parcel.status === 'not_delivered') && (
-                  <button 
-                    onClick={() => {
-                      setSelectedParcel(parcel);
-                      setDeliveryStatus(parcel.status);
-                      setComment(parcel.rider_comment || '');
-                    }}
-                    style={styles.button}
-                  >
-                    {parcel.status === 'assigned' ? 'Update Status' : 'Edit Status'}
-                  </button>
-                )}
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+      <div style={{ marginBottom: '1rem', display: 'flex', gap: '1rem', alignItems: 'center' }}>
+        <input
+          type="text"
+          placeholder="Search by recipient name, phone, or address..."
+          value={searchTerm}
+          onChange={(e) => {
+            setSearchTerm(e.target.value);
+            fetchParcels(e.target.value);
+          }}
+          style={{...styles.input, marginBottom: 0, maxWidth: '400px'}}
+        />
+        {searchTerm && (
+          <button 
+            onClick={() => {
+              setSearchTerm('');
+              fetchParcels();
+            }}
+            style={{...styles.button, background: '#dc3545'}}
+          >
+            Clear
+          </button>
+        )}
+      </div>
+
+      {Object.keys(parcels).length === 0 ? (
+        <div style={{ textAlign: 'center', color: '#6c757d', padding: '2rem' }}>
+          No parcels assigned to you.
+        </div>
+      ) : (
+        Object.entries(parcels).map(([date, dateParcels]) => {
+          const parcelCount = dateParcels.length;
+          const totalCOD = dateParcels.reduce((sum, p) => sum + parseFloat(p.cod_amount || 0), 0);
+          
+          return (
+            <div key={date} style={{ marginBottom: '2rem' }}>
+              <div style={{ 
+                background: 'linear-gradient(135deg, #343a40 0%, #495057 100%)', 
+                color: 'white', 
+                padding: '1rem', 
+                borderRadius: '8px 8px 0 0', 
+                display: 'flex', 
+                justifyContent: 'space-between',
+                alignItems: 'center'
+              }}>
+                <h4 style={{ margin: 0 }}>{toNepaliDate(dateParcels[0].created_at)} ({date})</h4>
+                <div style={{ display: 'flex', gap: '2rem' }}>
+                  <span>Parcels: {parcelCount}</span>
+                  <span>Total COD: NPR {formatCurrency(totalCOD)}</span>
+                </div>
+              </div>
+              
+              <table style={{...styles.table, marginTop: 0, borderRadius: '0 0 8px 8px'}}>
+                <thead>
+                  <tr>
+                    <th style={styles.th}>ID</th>
+                    <th style={styles.th}>Time</th>
+                    <th style={styles.th}>Vendor</th>
+                    <th style={styles.th}>Recipient</th>
+                    <th style={styles.th}>Address</th>
+                    <th style={styles.th}>Phone</th>
+                    <th style={styles.th}>COD Amount</th>
+                    <th style={styles.th}>Status</th>
+                    <th style={styles.th}>Comment</th>
+                    <th style={styles.th}>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {dateParcels.map(parcel => (
+                    <tr key={parcel.id}>
+                      <td style={styles.td}>{parcel.id}</td>
+                      <td style={styles.td}>
+                        {new Date(parcel.created_at).toLocaleTimeString('en-US', { 
+                          hour: '2-digit', 
+                          minute: '2-digit',
+                          hour12: true 
+                        })}
+                      </td>
+                      <td style={styles.td}>{parcel.vendor_name}</td>
+                      <td style={styles.td}>{parcel.recipient_name}</td>
+                      <td style={styles.td}>{parcel.address}</td>
+                      <td style={styles.td}>{parcel.recipient_phone}</td>
+                      <td style={styles.td}>NPR {formatCurrency(parcel.cod_amount)}</td>
+                      <td style={styles.td}>
+                        <span style={{
+                          padding: '0.25rem 0.5rem',
+                          borderRadius: '4px',
+                          background: parcel.status === 'delivered' ? '#d4edda' : 
+                                    parcel.status === 'not_delivered' ? '#f8d7da' : '#fff3cd',
+                          color: parcel.status === 'delivered' ? '#155724' : 
+                                 parcel.status === 'not_delivered' ? '#721c24' : '#856404'
+                        }}>
+                          {parcel.status}
+                        </span>
+                      </td>
+                      <td style={styles.td}>{parcel.rider_comment || '-'}</td>
+                      <td style={styles.td}>
+                        {(parcel.status === 'assigned' || parcel.status === 'delivered' || parcel.status === 'not_delivered') && (
+                          <button 
+                            onClick={() => {
+                              setSelectedParcel(parcel);
+                              setDeliveryStatus(parcel.status);
+                              setComment(parcel.rider_comment || '');
+                            }}
+                            style={styles.button}
+                          >
+                            {parcel.status === 'assigned' ? 'Update Status' : 'Edit Status'}
+                          </button>
+                        )}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          );
+        })
+      )}
 
       {selectedParcel && (
         <div style={styles.modal}>
