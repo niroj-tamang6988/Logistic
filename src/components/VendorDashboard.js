@@ -67,7 +67,7 @@ const VendorDashboard = () => {
 
   const fetchParcels = async () => {
     try {
-      const response = await fetch('https://logistic-backend-eight.vercel.app/api/parcels', {
+      const response = await fetch('https://logistic-backend-v3.vercel.app/api/parcels', {
         headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
       });
       const data = await response.json();
@@ -80,7 +80,7 @@ const VendorDashboard = () => {
 
   const fetchStats = async () => {
     try {
-      const response = await fetch('https://logistic-backend-eight.vercel.app/api/stats', {
+      const response = await fetch('https://logistic-backend-v3.vercel.app/api/stats', {
         headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
       });
       const data = await response.json();
@@ -93,7 +93,7 @@ const VendorDashboard = () => {
 
   const fetchFinancialData = async () => {
     try {
-      const response = await fetch('https://logistic-backend-eight.vercel.app/api/financial-report', {
+      const response = await fetch('https://logistic-backend-v3.vercel.app/api/financial-report', {
         headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
       });
       const data = await response.json();
@@ -106,7 +106,7 @@ const VendorDashboard = () => {
 
   const fetchDailyFinancialData = async () => {
     try {
-      const response = await fetch('https://logistic-backend-eight.vercel.app/api/financial-report-daily', {
+      const response = await fetch('https://logistic-backend-v3.vercel.app/api/financial-report-daily', {
         headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
       });
       const data = await response.json();
@@ -120,7 +120,7 @@ const VendorDashboard = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await fetch('https://logistic-backend-eight.vercel.app/api/parcels', {
+      const response = await fetch('https://logistic-backend-v3.vercel.app/api/parcels', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

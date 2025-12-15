@@ -51,7 +51,6 @@ const AdminDashboard = () => {
     staff_id: '',
     activity_type: 'advance',
     amount: '',
-    reason: '',
     notes: ''
   });
 
@@ -83,7 +82,7 @@ const AdminDashboard = () => {
 
   const fetchParcels = async () => {
     try {
-      const response = await fetch('https://logistic-backend-eight.vercel.app/api/parcels', {
+      const response = await fetch('https://logistic-backend-v3.vercel.app/api/parcels', {
         headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
       });
       const data = await response.json();
@@ -96,7 +95,7 @@ const AdminDashboard = () => {
 
   const fetchRiders = async () => {
     try {
-      const response = await fetch('https://logistic-backend-eight.vercel.app/api/riders', {
+      const response = await fetch('https://logistic-backend-v3.vercel.app/api/riders', {
         headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
       });
       const data = await response.json();
@@ -109,7 +108,7 @@ const AdminDashboard = () => {
 
   const fetchStats = async () => {
     try {
-      const response = await fetch('https://logistic-backend-eight.vercel.app/api/stats', {
+      const response = await fetch('https://logistic-backend-v3.vercel.app/api/stats', {
         headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
       });
       const data = await response.json();
@@ -122,7 +121,7 @@ const AdminDashboard = () => {
 
   const fetchUsers = async () => {
     try {
-      const response = await fetch('https://logistic-backend-eight.vercel.app/api/users', {
+      const response = await fetch('https://logistic-backend-v3.vercel.app/api/users', {
         headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
       });
       const data = await response.json();
@@ -135,7 +134,7 @@ const AdminDashboard = () => {
 
   const fetchFinancialData = async () => {
     try {
-      const response = await fetch('https://logistic-backend-eight.vercel.app/api/financial-report', {
+      const response = await fetch('https://logistic-backend-v3.vercel.app/api/financial-report', {
         headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
       });
       const data = await response.json();
@@ -148,7 +147,7 @@ const AdminDashboard = () => {
 
   const fetchDailyFinancialData = async () => {
     try {
-      const response = await fetch('https://logistic-backend-eight.vercel.app/api/financial-report-daily', {
+      const response = await fetch('https://logistic-backend-v3.vercel.app/api/financial-report-daily', {
         headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
       });
       const data = await response.json();
@@ -162,7 +161,7 @@ const AdminDashboard = () => {
   const fetchVendorReport = async () => {
     try {
       console.log('Fetching vendor report...');
-      const response = await fetch('https://logistic-backend-eight.vercel.app/api/vendor-report', {
+      const response = await fetch('https://logistic-backend-v3.vercel.app/api/vendor-report', {
         headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
       });
       const data = await response.json();
@@ -176,7 +175,7 @@ const AdminDashboard = () => {
 
   const fetchRiderReports = async () => {
     try {
-      const response = await fetch('https://logistic-backend-eight.vercel.app/api/rider-reports', {
+      const response = await fetch('https://logistic-backend-v3.vercel.app/api/rider-reports', {
         headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
       });
       const data = await response.json();
@@ -189,7 +188,7 @@ const AdminDashboard = () => {
 
   const fetchRiderDaybook = async (riderId) => {
     try {
-      const response = await fetch(`https://logistic-backend-eight.vercel.app/api/rider-daybook-details/${riderId}`, {
+      const response = await fetch(`https://logistic-backend-v3.vercel.app/api/rider-daybook-details/${riderId}`, {
         headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
       });
       const data = await response.json();
@@ -204,7 +203,7 @@ const AdminDashboard = () => {
     if (!window.confirm('Are you sure you want to delete this user?')) return;
     
     try {
-      const response = await fetch(`https://logistic-backend-eight.vercel.app/api/users/${userId}`, {
+      const response = await fetch(`https://logistic-backend-v3.vercel.app/api/users/${userId}`, {
         method: 'DELETE',
         headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
       });
@@ -222,7 +221,7 @@ const AdminDashboard = () => {
 
   const approveUser = async (userId) => {
     try {
-      const response = await fetch(`https://logistic-backend-eight.vercel.app/api/users/${userId}/approve`, {
+      const response = await fetch(`https://logistic-backend-v3.vercel.app/api/users/${userId}/approve`, {
         method: 'PUT',
         headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
       });
@@ -254,7 +253,7 @@ const AdminDashboard = () => {
 
   const fetchStaffActivities = async () => {
     try {
-      const response = await fetch('https://logistic-backend-eight.vercel.app/api/staff-activities', {
+      const response = await fetch('https://logistic-backend-v3.vercel.app/api/staff-activities', {
         headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
       });
       const data = await response.json();
@@ -268,7 +267,7 @@ const AdminDashboard = () => {
   const saveStaffActivity = async (e) => {
     e.preventDefault();
     try {
-      const response = await fetch('https://logistic-backend-eight.vercel.app/api/staff-activities', {
+      const response = await fetch('https://logistic-backend-v3.vercel.app/api/staff-activities', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -278,7 +277,7 @@ const AdminDashboard = () => {
       });
       
       if (response.ok) {
-        setActivityForm({ staff_id: '', activity_type: 'advance', amount: '', reason: '', notes: '' });
+        setActivityForm({ staff_id: '', activity_type: 'advance', amount: '', notes: '' });
         setShowActivityForm(false);
         fetchStaffActivities();
         showToast('Staff activity recorded successfully!');
@@ -292,7 +291,7 @@ const AdminDashboard = () => {
 
   const assignRider = async (parcelId, riderId) => {
     try {
-      const response = await fetch(`https://logistic-backend-eight.vercel.app/api/parcels/${parcelId}/assign`, {
+      const response = await fetch(`https://logistic-backend-v3.vercel.app/api/parcels/${parcelId}/assign`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -382,7 +381,7 @@ const AdminDashboard = () => {
       
       <div style={styles.statsGrid}>
         <div style={styles.statCard}>
-          <h3>{getStatCount('placed') + getStatCount('assigned') + getStatCount('delivered') + getStatCount('not_delivered')}</h3>
+          <h3>{getStatCount('pending') + getStatCount('assigned') + getStatCount('delivered') + getStatCount('not_delivered')}</h3>
           <p>Total Parcels</p>
         </div>
         <div style={styles.statCard}>
@@ -858,14 +857,7 @@ const AdminDashboard = () => {
                   required
                 />
                 
-                <input
-                  type="text"
-                  placeholder="Reason"
-                  value={activityForm.reason}
-                  onChange={(e) => setActivityForm({...activityForm, reason: e.target.value})}
-                  style={styles.select}
-                  required
-                />
+
                 
                 <textarea
                   placeholder="Notes (optional)"
@@ -888,7 +880,7 @@ const AdminDashboard = () => {
                 <th style={styles.th}>Staff</th>
                 <th style={styles.th}>Type</th>
                 <th style={styles.th}>Amount</th>
-                <th style={styles.th}>Reason</th>
+
                 <th style={styles.th}>Notes</th>
               </tr>
             </thead>
@@ -908,13 +900,13 @@ const AdminDashboard = () => {
                     </span>
                   </td>
                   <td style={styles.td}>NPR {formatCurrency(activity.amount)}</td>
-                  <td style={styles.td}>{activity.reason}</td>
+
                   <td style={styles.td}>{activity.notes || '-'}</td>
                 </tr>
               ))}
               {staffActivities.length === 0 && (
                 <tr>
-                  <td colSpan="6" style={{...styles.td, textAlign: 'center', color: '#6c757d'}}>
+                  <td colSpan="5" style={{...styles.td, textAlign: 'center', color: '#6c757d'}}>
                     No staff activities recorded.
                   </td>
                 </tr>

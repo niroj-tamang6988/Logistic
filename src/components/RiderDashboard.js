@@ -78,7 +78,7 @@ const RiderDashboard = () => {
 
   const fetchParcels = async () => {
     try {
-      const response = await fetch('https://logistic-backend-eight.vercel.app/api/parcels', {
+      const response = await fetch('https://logistic-backend-v3.vercel.app/api/parcels', {
         headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
       });
       const data = await response.json();
@@ -272,7 +272,7 @@ const RiderDashboard = () => {
   const updateDeliveryStatus = async (e) => {
     e.preventDefault();
     try {
-      const response = await fetch(`https://logistic-backend-eight.vercel.app/api/parcels/${selectedParcel.id}/delivery`, {
+      const response = await fetch(`https://logistic-backend-v3.vercel.app/api/parcels/${selectedParcel.id}/delivery`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
