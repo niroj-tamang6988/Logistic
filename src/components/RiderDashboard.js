@@ -778,7 +778,7 @@ const RiderDashboard = () => {
             <tbody>
               {daybook.map(entry => (
                 <tr key={entry.id}>
-                  <td style={styles.td}>{toNepaliDate(entry.date)}</td>
+                  <td style={styles.td}>{new Date(entry.date).toLocaleDateString()}</td>
                   <td style={styles.td}>{formatCurrency(entry.total_km)} KM</td>
                   <td style={styles.td}>{entry.parcels_delivered}</td>
                   <td style={styles.td}>NPR {formatCurrency(entry.fuel_cost)}</td>

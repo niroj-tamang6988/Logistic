@@ -584,7 +584,7 @@ const AdminDashboard = () => {
                     {user.is_approved ? 'Approved' : 'Pending'}
                   </span>
                 </td>
-                <td style={styles.td}>{toNepaliDate(user.created_at)}</td>
+                <td style={styles.td}>{new Date(user.created_at).toLocaleDateString()}</td>
                 <td style={styles.td}>
                   {!user.is_approved && (
                     <button 
@@ -673,7 +673,7 @@ const AdminDashboard = () => {
             <tbody>
               {dailyFinancialData.map((item, index) => (
                 <tr key={index}>
-                  <td style={styles.td}>{toNepaliDate(item.date)}</td>
+                  <td style={styles.td}>{new Date(item.date).toLocaleDateString()}</td>
                   <td style={styles.td}>
                     <span style={{
                       padding: '0.25rem 0.5rem',
@@ -711,7 +711,7 @@ const AdminDashboard = () => {
             return (
               <div key={date} style={{ marginBottom: '2rem' }}>
                 <div style={{ background: '#343a40', color: 'white', padding: '1rem', borderRadius: '8px 8px 0 0', display: 'flex', justifyContent: 'space-between' }}>
-                  <h4>{date !== 'No Date' ? toNepaliDate(date) : 'No Date'}</h4>
+                  <h4>{date !== 'No Date' ? new Date(date).toLocaleDateString() : 'No Date'}</h4>
                   <div>
                     <span style={{ marginRight: '2rem' }}>Total Parcels: {parcelTotal}</span>
                     <span>Total COD: NPR {formatCurrency(dateTotal)}</span>
@@ -813,7 +813,7 @@ const AdminDashboard = () => {
                     <tbody>
                       {riderDaybook.map((entry, index) => (
                         <tr key={index}>
-                          <td style={styles.td}>{toNepaliDate(entry.date)}</td>
+                          <td style={styles.td}>{new Date(entry.date).toLocaleDateString()}</td>
                           <td style={styles.td}>{formatCurrency(entry.total_km)} KM</td>
                           <td style={styles.td}>{entry.parcels_delivered}</td>
                           <td style={styles.td}>NPR {formatCurrency(entry.fuel_cost)}</td>
@@ -922,7 +922,7 @@ const AdminDashboard = () => {
             <tbody>
               {staffActivities.map(activity => (
                 <tr key={activity.id}>
-                  <td style={styles.td}>{toNepaliDate(activity.created_at)}</td>
+                  <td style={styles.td}>{new Date(activity.created_at).toLocaleDateString()}</td>
                   <td style={styles.td}>{activity.staff_name}</td>
                   <td style={styles.td}>
                     <span style={{

@@ -422,7 +422,7 @@ const VendorDashboard = () => {
             <tbody>
               {dailyFinancialData.map((item, index) => (
                 <tr key={index}>
-                  <td style={styles.td}>{toNepaliDate(item.date)}</td>
+                  <td style={styles.td}>{new Date(item.date).toLocaleDateString()}</td>
                   <td style={styles.td}>
                     <span style={{
                       padding: '0.25rem 0.5rem',
