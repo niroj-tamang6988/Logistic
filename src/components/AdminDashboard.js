@@ -13,26 +13,23 @@ const formatDateKey = (dateKey) => {
   });
 };
 
-// Simple Nepali date converter
+// Simple Nepali date converter (fixed)
 const toNepaliDate = (adDate) => {
   try {
     const date = new Date(adDate);
-    let year = date.getFullYear();
-    let month = date.getMonth() + 1;
-    let day = date.getDate();
+    // Simple approximation: Add 56-57 years and adjust months
+    let bsYear = date.getFullYear() + 56;
+    let bsMonth = date.getMonth() + 9; // Rough conversion
+    let bsDay = date.getDate();
     
-    // Convert to Bikram Sambat (approximate)
-    // December 11, 2024 = 2082/08/25, so December = month 8 in BS
-    let bsYear = year + 57;
-    let bsMonth = month - 4; // December (12) - 4 = 8
-    
-    // Adjust day: Dec 11 = BS day 25, so add 14 days
-    let bsDay = day + 14;
-    
-    if (bsMonth <= 0) {
-      bsMonth += 12;
-      bsYear -= 1;
+    // Handle month overflow
+    if (bsMonth > 12) {
+      bsMonth -= 12;
+      bsYear += 1;
     }
+    
+    // Ensure day is within valid range (1-32 for most Nepali months)
+    if (bsDay > 32) bsDay = 32;
     
     return `${bsYear}/${String(bsMonth).padStart(2, '0')}/${String(bsDay).padStart(2, '0')}`;
   } catch (error) {
@@ -328,6 +325,24 @@ const AdminDashboard = () => {
     }
   };
 
+  const fixOldDates = async () => {
+    try {
+      const response = await fetch('https://logistic-backend-v3.vercel.app/api/fix-dates', {
+        method: 'PUT',
+        headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+      });
+      const data = await response.json();
+      if (response.ok) {
+        showToast(`Fixed ${data.updated_count} old parcel dates!`);
+        fetchParcels(searchTerm);
+      } else {
+        showToast(data.message || 'Error fixing dates', 'error');
+      }
+    } catch (error) {
+      showToast('Error fixing dates', 'error');
+    }
+  };
+
   const getStatCount = (status) => {
     const stat = stats.find(s => s.status === status);
     return stat ? stat.count : 0;
@@ -391,6 +406,12 @@ const AdminDashboard = () => {
           style={{...styles.button, background: activeTab === 'profile' ? '#007bff' : '#6c757d'}}
         >
           My Profile
+        </button>
+        <button 
+          onClick={fixOldDates}
+          style={{...styles.button, background: '#dc3545', marginLeft: '2rem'}}
+        >
+          Fix Old Dates
         </button>
       </div>
       
