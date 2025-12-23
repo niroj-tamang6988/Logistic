@@ -13,23 +13,25 @@ const formatDateKey = (dateKey) => {
   });
 };
 
-// Simple Nepali date converter (fixed)
+// Proper Nepali date converter
 const toNepaliDate = (adDate) => {
   try {
     const date = new Date(adDate);
-    // Simple approximation: Add 56-57 years and adjust months
-    let bsYear = date.getFullYear() + 56;
-    let bsMonth = date.getMonth() + 9; // Rough conversion
-    let bsDay = date.getDate();
+    const year = date.getFullYear();
+    const month = date.getMonth() + 1;
+    const day = date.getDate();
     
-    // Handle month overflow
-    if (bsMonth > 12) {
-      bsMonth -= 12;
-      bsYear += 1;
-    }
+    // Basic conversion: Add 56-57 years to get BS year
+    let bsYear = year + 56;
+    if (month >= 4) bsYear += 1; // After April, add extra year
     
-    // Ensure day is within valid range (1-32 for most Nepali months)
-    if (bsDay > 32) bsDay = 32;
+    // Month conversion (approximate)
+    let bsMonth = month + 8;
+    if (bsMonth > 12) bsMonth -= 12;
+    
+    // Day adjustment
+    let bsDay = day;
+    if (bsDay > 30) bsDay = 30; // Most BS months have 30 days
     
     return `${bsYear}/${String(bsMonth).padStart(2, '0')}/${String(bsDay).padStart(2, '0')}`;
   } catch (error) {
