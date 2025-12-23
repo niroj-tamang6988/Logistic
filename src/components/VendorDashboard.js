@@ -1,6 +1,18 @@
 import React, { useState, useEffect } from 'react';
 import { useToast } from './Toast';
 
+// Convert date key (YYYY-MM-DD) to readable format
+const formatDateKey = (dateKey) => {
+  const [year, month, day] = dateKey.split('-');
+  const date = new Date(year, month - 1, day);
+  return date.toLocaleDateString('en-US', { 
+    weekday: 'long', 
+    year: 'numeric', 
+    month: 'long', 
+    day: 'numeric' 
+  });
+};
+
 // Simple Nepali date converter
 const toNepaliDate = (adDate) => {
   try {
@@ -312,7 +324,7 @@ const VendorDashboard = () => {
                 justifyContent: 'space-between',
                 alignItems: 'center'
               }}>
-                <h4 style={{ margin: 0 }}>{toNepaliDate(dateParcels[0].created_at)} ({date})</h4>
+                <h4 style={{ margin: 0 }}>{toNepaliDate(dateParcels[0].created_at)} ({formatDateKey(date)})</h4>
                 <div style={{ display: 'flex', gap: '2rem' }}>
                   <span>Parcels: {parcelCount}</span>
                   <span>Total COD: NPR {formatCurrency(totalCOD)}</span>
