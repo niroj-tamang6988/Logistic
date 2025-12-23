@@ -13,32 +13,6 @@ const formatDateKey = (dateKey) => {
   });
 };
 
-// Proper Nepali date converter
-const toNepaliDate = (adDate) => {
-  try {
-    const date = new Date(adDate);
-    const year = date.getFullYear();
-    const month = date.getMonth() + 1;
-    const day = date.getDate();
-    
-    // Basic conversion: Add 56-57 years to get BS year
-    let bsYear = year + 56;
-    if (month >= 4) bsYear += 1; // After April, add extra year
-    
-    // Month conversion (approximate)
-    let bsMonth = month + 8;
-    if (bsMonth > 12) bsMonth -= 12;
-    
-    // Day adjustment
-    let bsDay = day;
-    if (bsDay > 30) bsDay = 30; // Most BS months have 30 days
-    
-    return `${bsYear}/${String(bsMonth).padStart(2, '0')}/${String(bsDay).padStart(2, '0')}`;
-  } catch (error) {
-    return 'N/A';
-  }
-};
-
 const VendorDashboard = () => {
   const { showToast, ToastComponent } = useToast();
   const [parcels, setParcels] = useState([]);
@@ -323,7 +297,7 @@ const VendorDashboard = () => {
                 justifyContent: 'space-between',
                 alignItems: 'center'
               }}>
-                <h4 style={{ margin: 0 }}>{toNepaliDate(dateParcels[0].created_at)} ({formatDateKey(date)})</h4>
+                <h4 style={{ margin: 0 }}>{formatDateKey(date)}</h4>
                 <div style={{ display: 'flex', gap: '2rem' }}>
                   <span>Parcels: {parcelCount}</span>
                   <span>Total COD: NPR {formatCurrency(totalCOD)}</span>

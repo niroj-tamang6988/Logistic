@@ -13,32 +13,6 @@ const formatDateKey = (dateKey) => {
   });
 };
 
-// Proper Nepali date converter
-const toNepaliDate = (adDate) => {
-  try {
-    const date = new Date(adDate);
-    const year = date.getFullYear();
-    const month = date.getMonth() + 1;
-    const day = date.getDate();
-    
-    // Basic conversion: Add 56-57 years to get BS year
-    let bsYear = year + 56;
-    if (month >= 4) bsYear += 1; // After April, add extra year
-    
-    // Month conversion (approximate)
-    let bsMonth = month + 8;
-    if (bsMonth > 12) bsMonth -= 12;
-    
-    // Day adjustment
-    let bsDay = day;
-    if (bsDay > 30) bsDay = 30; // Most BS months have 30 days
-    
-    return `${bsYear}/${String(bsMonth).padStart(2, '0')}/${String(bsDay).padStart(2, '0')}`;
-  } catch (error) {
-    return 'N/A';
-  }
-};
-
 const AdminDashboard = () => {
   const { showToast, ToastComponent } = useToast();
   const [parcels, setParcels] = useState({});
@@ -327,24 +301,6 @@ const AdminDashboard = () => {
     }
   };
 
-  const fixOldDates = async () => {
-    try {
-      const response = await fetch('https://logistic-backend-v3.vercel.app/api/fix-dates', {
-        method: 'PUT',
-        headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
-      });
-      const data = await response.json();
-      if (response.ok) {
-        showToast(`Fixed ${data.updated_count} old parcel dates!`);
-        fetchParcels(searchTerm);
-      } else {
-        showToast(data.message || 'Error fixing dates', 'error');
-      }
-    } catch (error) {
-      showToast('Error fixing dates', 'error');
-    }
-  };
-
   const getStatCount = (status) => {
     const stat = stats.find(s => s.status === status);
     return stat ? stat.count : 0;
@@ -408,12 +364,6 @@ const AdminDashboard = () => {
           style={{...styles.button, background: activeTab === 'profile' ? '#007bff' : '#6c757d'}}
         >
           My Profile
-        </button>
-        <button 
-          onClick={fixOldDates}
-          style={{...styles.button, background: '#dc3545', marginLeft: '2rem'}}
-        >
-          Fix Old Dates
         </button>
       </div>
       
@@ -482,7 +432,7 @@ const AdminDashboard = () => {
                 justifyContent: 'space-between',
                 alignItems: 'center'
               }}>
-                <h4 style={{ margin: 0 }}>{toNepaliDate(dateParcels[0].created_at)} ({formatDateKey(date)})</h4>
+                <h4 style={{ margin: 0 }}>{formatDateKey(date)}</h4>
                 <div style={{ display: 'flex', gap: '2rem' }}>
                   <span>Parcels: {parcelCount}</span>
                   <span>Total COD: NPR {formatCurrency(totalCOD)}</span>
@@ -501,6 +451,7 @@ const AdminDashboard = () => {
                     <th style={styles.th}>COD Amount</th>
                     <th style={styles.th}>Status</th>
                     <th style={styles.th}>Rider</th>
+                    <th style={styles.th}>Comment</th>
                     <th style={styles.th}>Action</th>
                   </tr>
                 </thead>
@@ -533,6 +484,7 @@ const AdminDashboard = () => {
                         </span>
                       </td>
                       <td style={styles.td}>{parcel.rider_name || 'Not assigned'}</td>
+                      <td style={styles.td}>{parcel.rider_comment || '-'}</td>
                       <td style={styles.td}>
                         {editingParcel === parcel.id ? (
                           <div style={{ display: 'flex', gap: '0.5rem' }}>
