@@ -31,14 +31,7 @@ const AdminDashboard = () => {
   const [isEditingProfile, setIsEditingProfile] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [editingParcel, setEditingParcel] = useState(null);
-  const [staffActivities, setStaffActivities] = useState([]);
-  const [showActivityForm, setShowActivityForm] = useState(false);
-  const [activityForm, setActivityForm] = useState({
-    staff_id: '',
-    activity_type: 'advance',
-    amount: '',
-    notes: ''
-  });
+
 
   useEffect(() => {
     fetchParcels();
@@ -50,9 +43,7 @@ const AdminDashboard = () => {
     fetchVendorReport();
     fetchRiderReports();
     fetchProfile();
-    if (activeTab === 'activities') {
-      fetchStaffActivities();
-    }
+
   }, []);
 
   const fetchProfile = async () => {
@@ -253,43 +244,7 @@ const AdminDashboard = () => {
     return num % 1 === 0 ? num.toString() : num.toFixed(2);
   };
 
-  const fetchStaffActivities = async () => {
-    try {
-      const response = await fetch('https://logistic-backend-v3.vercel.app/api/staff-activities', {
-        headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
-      });
-      const data = await response.json();
-      setStaffActivities(Array.isArray(data) ? data : []);
-    } catch (error) {
-      console.error('Error fetching staff activities:', error);
-      setStaffActivities([]);
-    }
-  };
 
-  const saveStaffActivity = async (e) => {
-    e.preventDefault();
-    try {
-      const response = await fetch('https://logistic-backend-v3.vercel.app/api/staff-activities', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${localStorage.getItem('token')}`
-        },
-        body: JSON.stringify(activityForm)
-      });
-      
-      if (response.ok) {
-        setActivityForm({ staff_id: '', activity_type: 'advance', amount: '', notes: '' });
-        setShowActivityForm(false);
-        fetchStaffActivities();
-        showToast('Staff activity recorded successfully!');
-      } else {
-        showToast('Error recording staff activity', 'error');
-      }
-    } catch (error) {
-      showToast('Error recording staff activity', 'error');
-    }
-  };
 
   const assignRider = async (parcelId, riderId) => {
     try {
@@ -367,12 +322,7 @@ const AdminDashboard = () => {
         >
           Rider Reports
         </button>
-        <button 
-          onClick={() => setActiveTab('activities')} 
-          style={{...styles.button, background: activeTab === 'activities' ? '#007bff' : '#6c757d', marginRight: '1rem'}}
-        >
-          Staff Activities
-        </button>
+
         <button 
           onClick={() => setActiveTab('profile')} 
           style={{...styles.button, background: activeTab === 'profile' ? '#007bff' : '#6c757d'}}
@@ -648,7 +598,6 @@ const AdminDashboard = () => {
                 <th style={styles.th}>Status</th>
                 <th style={styles.th}>Total Parcels</th>
                 <th style={styles.th}>Total COD Amount</th>
-                <th style={styles.th}>Average COD</th>
               </tr>
             </thead>
             <tbody>
@@ -668,7 +617,6 @@ const AdminDashboard = () => {
                   </td>
                   <td style={styles.td}>{item.count}</td>
                   <td style={styles.td}>NPR {formatCurrency(item.total_cod || 0)}</td>
-                  <td style={styles.td}>NPR {formatCurrency(item.count > 0 ? (item.total_cod || 0) / item.count : 0)}</td>
                 </tr>
               ))}
             </tbody>
@@ -947,114 +895,7 @@ const AdminDashboard = () => {
         </div>
       )}
       
-      {activeTab === 'activities' && (
-        <div>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
-            <h3>Staff Activities</h3>
-            <button 
-              onClick={() => setShowActivityForm(!showActivityForm)}
-              style={{...styles.button, background: '#28a745'}}
-            >
-              {showActivityForm ? 'Cancel' : 'Add Activity'}
-            </button>
-          </div>
-          
-          {showActivityForm && (
-            <div style={{ background: 'white', padding: '2rem', borderRadius: '8px', boxShadow: '0 4px 12px rgba(0,0,0,0.1)', marginBottom: '2rem' }}>
-              <h4>Record Staff Activity</h4>
-              <form onSubmit={saveStaffActivity} style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem' }}>
-                <select
-                  value={activityForm.staff_id}
-                  onChange={(e) => setActivityForm({...activityForm, staff_id: e.target.value})}
-                  style={styles.select}
-                  required
-                >
-                  <option value="">Select Staff</option>
-                  {users.filter(u => u.role === 'rider').map(user => (
-                    <option key={user.id} value={user.id}>{user.name}</option>
-                  ))}
-                </select>
-                
-                <select
-                  value={activityForm.activity_type}
-                  onChange={(e) => setActivityForm({...activityForm, activity_type: e.target.value})}
-                  style={styles.select}
-                >
-                  <option value="advance">Advance Payment</option>
-                  <option value="fuel">Fuel Allowance</option>
-                  <option value="bonus">Bonus</option>
-                  <option value="deduction">Deduction</option>
-                  <option value="other">Other</option>
-                </select>
-                
-                <input
-                  type="number"
-                  step="0.01"
-                  placeholder="Amount (NPR)"
-                  value={activityForm.amount}
-                  onChange={(e) => setActivityForm({...activityForm, amount: e.target.value})}
-                  style={styles.select}
-                  required
-                />
-                
 
-                
-                <textarea
-                  placeholder="Notes (optional)"
-                  value={activityForm.notes}
-                  onChange={(e) => setActivityForm({...activityForm, notes: e.target.value})}
-                  style={{...styles.select, gridColumn: 'span 2', minHeight: '60px'}}
-                />
-                
-                <button type="submit" style={{...styles.button, background: '#28a745'}}>
-                  Record Activity
-                </button>
-              </form>
-            </div>
-          )}
-          
-          <table style={styles.table}>
-            <thead>
-              <tr>
-                <th style={styles.th}>Date</th>
-                <th style={styles.th}>Staff</th>
-                <th style={styles.th}>Type</th>
-                <th style={styles.th}>Amount</th>
-
-                <th style={styles.th}>Notes</th>
-              </tr>
-            </thead>
-            <tbody>
-              {staffActivities.map(activity => (
-                <tr key={activity.id}>
-                  <td style={styles.td}>{new Date(activity.created_at).toLocaleDateString()}</td>
-                  <td style={styles.td}>{activity.staff_name}</td>
-                  <td style={styles.td}>
-                    <span style={{
-                      padding: '0.25rem 0.5rem',
-                      borderRadius: '4px',
-                      background: activity.activity_type === 'deduction' ? '#f8d7da' : '#d4edda',
-                      color: activity.activity_type === 'deduction' ? '#721c24' : '#155724'
-                    }}>
-                      {activity.activity_type}
-                    </span>
-                  </td>
-                  <td style={styles.td}>NPR {formatCurrency(activity.amount)}</td>
-
-                  <td style={styles.td}>{activity.notes || '-'}</td>
-                </tr>
-              ))}
-              {staffActivities.length === 0 && (
-                <tr>
-                  <td colSpan="5" style={{...styles.td, textAlign: 'center', color: '#6c757d'}}>
-                    No staff activities recorded.
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
-      )}
       
       {activeTab === 'profile' && (
         <div style={{ background: 'white', padding: '2rem', borderRadius: '8px', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}>
