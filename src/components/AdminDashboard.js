@@ -812,13 +812,37 @@ const AdminDashboard = () => {
                   <div>Total Distance</div>
                 </div>
                 <div style={{ textAlign: 'center', padding: '1rem', background: '#f8f9fa', borderRadius: '4px' }}>
-                  <strong style={{ fontSize: '1.2rem', color: '#28a745' }}>{rider.total_parcels_delivered}</strong>
+                  <strong style={{ fontSize: '1.2rem', color: '#28a745' }}>{rider.total_parcels}</strong>
                   <div>Total Parcels</div>
                 </div>
-                
                 <div style={{ textAlign: 'center', padding: '1rem', background: '#f8f9fa', borderRadius: '4px' }}>
                   <strong style={{ fontSize: '1.2rem', color: '#6c757d' }}>{rider.working_days}</strong>
                   <div>Working Days</div>
+                </div>
+                <div style={{ textAlign: 'center', padding: '1rem', background: '#f8f9fa', borderRadius: '4px' }}>
+                  <strong style={{ fontSize: '1.2rem', color: '#17a2b8' }}>NPR {formatCurrency(rider.total_cod)}</strong>
+                  <div>Total COD</div>
+                </div>
+              </div>
+              
+              <div style={{ marginTop: '1rem' }}>
+                <h5>Delivery Status Breakdown</h5>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem' }}>
+                  <div style={{ padding: '1rem', background: '#d4edda', borderRadius: '4px', border: '1px solid #c3e6cb' }}>
+                    <div style={{ fontWeight: 'bold', color: '#155724' }}>Delivered</div>
+                    <div>{rider.delivered_parcels} parcels</div>
+                    <div>NPR {formatCurrency(rider.delivered_cod)}</div>
+                  </div>
+                  <div style={{ padding: '1rem', background: '#fff3cd', borderRadius: '4px', border: '1px solid #ffeaa7' }}>
+                    <div style={{ fontWeight: 'bold', color: '#856404' }}>In Progress</div>
+                    <div>{rider.assigned_parcels} parcels</div>
+                    <div>NPR {formatCurrency(rider.assigned_cod)}</div>
+                  </div>
+                  <div style={{ padding: '1rem', background: '#f8d7da', borderRadius: '4px', border: '1px solid #f5c6cb' }}>
+                    <div style={{ fontWeight: 'bold', color: '#721c24' }}>Not Delivered</div>
+                    <div>{rider.not_delivered_parcels} parcels</div>
+                    <div>NPR {formatCurrency(rider.not_delivered_cod)}</div>
+                  </div>
                 </div>
               </div>
               
