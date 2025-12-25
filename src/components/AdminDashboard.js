@@ -25,6 +25,7 @@ const AdminDashboard = () => {
   const [riderReports, setRiderReports] = useState([]);
   const [selectedRider, setSelectedRider] = useState(null);
   const [riderDaybook, setRiderDaybook] = useState([]);
+  const [riderDailyStatus, setRiderDailyStatus] = useState([]);
   const [activeTab, setActiveTab] = useState('parcels');
   const [profile, setProfile] = useState({ name: '', email: '' });
   const [isEditingProfile, setIsEditingProfile] = useState(false);
@@ -184,6 +185,19 @@ const AdminDashboard = () => {
     } catch (error) {
       console.error('Error fetching rider daybook:', error);
       setRiderDaybook([]);
+    }
+  };
+
+  const fetchRiderDailyStatus = async (riderId) => {
+    try {
+      const response = await fetch(`https://logistic-backend-v3.vercel.app/api/rider-daily-status/${riderId}`, {
+        headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+      });
+      const data = await response.json();
+      setRiderDailyStatus(Array.isArray(data) ? data : []);
+    } catch (error) {
+      console.error('Error fetching rider daily status:', error);
+      setRiderDailyStatus([]);
     }
   };
 
@@ -780,9 +794,11 @@ const AdminDashboard = () => {
                     if (selectedRider === rider.id) {
                       setSelectedRider(null);
                       setRiderDaybook([]);
+                      setRiderDailyStatus([]);
                     } else {
                       setSelectedRider(rider.id);
                       fetchRiderDaybook(rider.id);
+                      fetchRiderDailyStatus(rider.id);
                     }
                   }}
                   style={{...styles.button, background: selectedRider === rider.id ? '#dc3545' : '#007bff', padding: '0.5rem 1rem'}}
@@ -848,7 +864,48 @@ const AdminDashboard = () => {
               
               {selectedRider === rider.id && (
                 <div style={{ marginTop: '2rem' }}>
-                  <h5>Daily Entries</h5>
+                  <h5>Daily Status Breakdown</h5>
+                  <div>
+                    {Object.entries(
+                      riderDailyStatus.reduce((acc, item) => {
+                        const date = item.date || 'No Date';
+                        if (!acc[date]) acc[date] = [];
+                        acc[date].push(item);
+                        return acc;
+                      }, {})
+                    ).map(([date, statuses]) => {
+                      const dateTotal = statuses.reduce((sum, s) => sum + parseFloat(s.total_cod || 0), 0);
+                      const parcelTotal = statuses.reduce((sum, s) => sum + parseInt(s.count || 0), 0);
+                      return (
+                        <div key={date} style={{ marginBottom: '1rem' }}>
+                          <div style={{ background: '#495057', color: 'white', padding: '0.5rem 1rem', borderRadius: '4px 4px 0 0', display: 'flex', justifyContent: 'space-between' }}>
+                            <span>{date !== 'No Date' ? new Date(date).toLocaleDateString() : 'No Date'}</span>
+                            <span>{parcelTotal} parcels, NPR {formatCurrency(dateTotal)}</span>
+                          </div>
+                          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: '0.5rem', padding: '0.5rem', background: '#f8f9fa', borderRadius: '0 0 4px 4px' }}>
+                            {statuses.map((status, index) => (
+                              <div key={index} style={{ 
+                                padding: '0.5rem', 
+                                borderRadius: '4px',
+                                background: status.status === 'delivered' ? '#d4edda' : 
+                                          status.status === 'not_delivered' ? '#f8d7da' : '#fff3cd',
+                                color: status.status === 'delivered' ? '#155724' : 
+                                       status.status === 'not_delivered' ? '#721c24' : '#856404',
+                                textAlign: 'center',
+                                fontSize: '0.9rem'
+                              }}>
+                                <div style={{ fontWeight: 'bold' }}>{status.status}</div>
+                                <div>{status.count} parcels</div>
+                                <div>NPR {formatCurrency(status.total_cod)}</div>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                  
+                  <h5 style={{ marginTop: '2rem' }}>Daily Entries</h5>
                   <table style={styles.table}>
                     <thead>
                       <tr>
