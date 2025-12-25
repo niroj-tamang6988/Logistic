@@ -660,38 +660,62 @@ const AdminDashboard = () => {
             </tbody>
           </table>
           
-          <h3 style={{ marginTop: '2rem', marginBottom: '1rem' }}>Daily COD Report (All Vendors)</h3>
-          <table style={styles.table}>
-            <thead>
-              <tr>
-                <th style={styles.th}>Date</th>
-                <th style={styles.th}>Status</th>
-                <th style={styles.th}>Total Parcels</th>
-                <th style={styles.th}>Total COD Amount</th>
-              </tr>
-            </thead>
-            <tbody>
-              {dailyFinancialData.map((item, index) => (
-                <tr key={index}>
-                  <td style={styles.td}>{new Date(item.date).toLocaleDateString()}</td>
-                  <td style={styles.td}>
-                    <span style={{
-                      padding: '0.25rem 0.5rem',
-                      borderRadius: '4px',
-                      background: item.status === 'delivered' ? '#d4edda' : 
-                                item.status === 'not_delivered' ? '#f8d7da' : '#fff3cd',
-                      color: item.status === 'delivered' ? '#155724' : 
-                             item.status === 'not_delivered' ? '#721c24' : '#856404'
-                    }}>
-                      {item.status}
-                    </span>
-                  </td>
-                  <td style={styles.td}>{item.count}</td>
-                  <td style={styles.td}>NPR {formatCurrency(item.total_cod || 0)}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+          <h3 style={{ marginTop: '2rem', marginBottom: '1rem' }}>Daily COD Report - Vendor & Status Wise</h3>
+          <div>
+            {Object.entries(
+              dailyFinancialData.reduce((acc, item) => {
+                const date = item.date || 'No Date';
+                if (!acc[date]) acc[date] = [];
+                acc[date].push(item);
+                return acc;
+              }, {})
+            ).map(([date, vendors]) => {
+              const dateTotal = vendors.reduce((sum, v) => sum + parseFloat(v.total_cod || 0), 0);
+              const parcelTotal = vendors.reduce((sum, v) => sum + parseInt(v.count || 0), 0);
+              return (
+                <div key={date} style={{ marginBottom: '2rem' }}>
+                  <div style={{ background: '#343a40', color: 'white', padding: '1rem', borderRadius: '8px 8px 0 0', display: 'flex', justifyContent: 'space-between' }}>
+                    <h4>{date !== 'No Date' ? new Date(date).toLocaleDateString() : 'No Date'}</h4>
+                    <div>
+                      <span style={{ marginRight: '2rem' }}>Total Parcels: {parcelTotal}</span>
+                      <span>Total COD: NPR {formatCurrency(dateTotal)}</span>
+                    </div>
+                  </div>
+                  <table style={{...styles.table, marginTop: 0, borderRadius: '0 0 8px 8px'}}>
+                    <thead>
+                      <tr>
+                        <th style={styles.th}>Vendor</th>
+                        <th style={styles.th}>Status</th>
+                        <th style={styles.th}>Parcels</th>
+                        <th style={styles.th}>COD Amount</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {vendors.map((item, index) => (
+                        <tr key={index}>
+                          <td style={styles.td}>{item.vendor_name}</td>
+                          <td style={styles.td}>
+                            <span style={{
+                              padding: '0.25rem 0.5rem',
+                              borderRadius: '4px',
+                              background: item.status === 'delivered' ? '#d4edda' : 
+                                        item.status === 'not_delivered' ? '#f8d7da' : '#fff3cd',
+                              color: item.status === 'delivered' ? '#155724' : 
+                                     item.status === 'not_delivered' ? '#721c24' : '#856404'
+                            }}>
+                              {item.status}
+                            </span>
+                          </td>
+                          <td style={styles.td}>{item.count}</td>
+                          <td style={styles.td}>NPR {formatCurrency(item.total_cod || 0)}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              );
+            })}
+          </div>
         </div>
       )}
       
