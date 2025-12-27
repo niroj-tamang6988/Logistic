@@ -51,12 +51,14 @@ const AdminDashboard = () => {
     fetchVendorReport();
     fetchRiderReports();
     fetchProfile();
+  }, []);
+
+  useEffect(() => {
     if (activeTab === 'payments') {
       fetchPaymentHistory();
       fetchVendorPaymentSummary();
     }
-
-  }, []);
+  }, [activeTab]);
 
   const fetchProfile = async () => {
     try {
@@ -210,6 +212,7 @@ const AdminDashboard = () => {
         headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
       });
       const data = await response.json();
+      console.log('Vendor payment summary response:', data);
       setVendorPaymentSummary(Array.isArray(data) ? data : []);
     } catch (error) {
       console.error('Error fetching vendor payment summary:', error);
