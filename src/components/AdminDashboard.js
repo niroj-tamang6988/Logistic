@@ -1027,6 +1027,7 @@ const AdminDashboard = () => {
             <thead>
               <tr>
                 <th style={styles.th}>Vendor</th>
+                <th style={styles.th}>Total Parcels</th>
                 <th style={styles.th}>Total Delivered</th>
                 <th style={styles.th}>Total Paid</th>
                 <th style={styles.th}>Pending Amount</th>
@@ -1036,6 +1037,7 @@ const AdminDashboard = () => {
               {vendorPaymentSummary.map(vendor => (
                 <tr key={vendor.vendor_id}>
                   <td style={styles.td}>{vendor.vendor_name}</td>
+                  <td style={styles.td}>{vendor.total_parcels || 0}</td>
                   <td style={styles.td}>NPR {formatCurrency(vendor.total_delivered_amount)}</td>
                   <td style={styles.td}>NPR {formatCurrency(vendor.total_paid_amount)}</td>
                   <td style={styles.td}>
@@ -1052,7 +1054,7 @@ const AdminDashboard = () => {
               ))}
               {vendorPaymentSummary.length === 0 && (
                 <tr>
-                  <td colSpan="4" style={{...styles.td, textAlign: 'center', color: '#6c757d'}}>
+                  <td colSpan="5" style={{...styles.td, textAlign: 'center', color: '#6c757d'}}>
                     No vendor data found.
                   </td>
                 </tr>
