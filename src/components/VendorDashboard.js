@@ -28,15 +28,18 @@ const VendorDashboard = () => {
     cod_amount: ''
   });
   const [searchTerm, setSearchTerm] = useState('');
-
-
+  const [paymentHistory, setPaymentHistory] = useState([]);
+  const [vendorPaymentSummary, setVendorPaymentSummary] = useState([]);
 
   useEffect(() => {
     fetchParcels();
     fetchStats();
     fetchFinancialData();
     fetchDailyFinancialData();
-
+    if (activeTab === 'payments') {
+      fetchPaymentHistory();
+      fetchVendorPaymentSummary();
+    }
   }, [activeTab]);
 
   useEffect(() => {
@@ -50,10 +53,6 @@ const VendorDashboard = () => {
   const getAllParcels = () => {
     return Object.values(parcels).flat();
   };
-
-
-
-
 
   const fetchParcels = async (search = '') => {
     try {
@@ -107,6 +106,32 @@ const VendorDashboard = () => {
     } catch (error) {
       console.error('Error fetching daily financial data:', error);
       setDailyFinancialData([]);
+    }
+  };
+
+  const fetchPaymentHistory = async () => {
+    try {
+      const response = await fetch('https://logistic-backend-v3.vercel.app/api/payment-history', {
+        headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+      });
+      const data = await response.json();
+      setPaymentHistory(Array.isArray(data) ? data : []);
+    } catch (error) {
+      console.error('Error fetching payment history:', error);
+      setPaymentHistory([]);
+    }
+  };
+
+  const fetchVendorPaymentSummary = async () => {
+    try {
+      const response = await fetch('https://logistic-backend-v3.vercel.app/api/vendor-payment-summary', {
+        headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+      });
+      const data = await response.json();
+      setVendorPaymentSummary(Array.isArray(data) ? data : []);
+    } catch (error) {
+      console.error('Error fetching vendor payment summary:', error);
+      setVendorPaymentSummary([]);
     }
   };
 
@@ -183,9 +208,15 @@ const VendorDashboard = () => {
         </button>
         <button 
           onClick={() => setActiveTab('financial')} 
-          style={{...styles.button, background: activeTab === 'financial' ? '#007bff' : '#6c757d'}}
+          style={{...styles.button, background: activeTab === 'financial' ? '#007bff' : '#6c757d', marginRight: '1rem'}}
         >
           Financial Reports
+        </button>
+        <button 
+          onClick={() => setActiveTab('payments')} 
+          style={{...styles.button, background: activeTab === 'payments' ? '#007bff' : '#6c757d'}}
+        >
+          Payment History
         </button>
       </div>
       
@@ -463,6 +494,55 @@ const VendorDashboard = () => {
               );
             })}
           </div>
+        </div>
+      )}
+      
+      {activeTab === 'payments' && (
+        <div>
+          <h3>Payment History</h3>
+          
+          {vendorPaymentSummary.length > 0 && (
+            <div style={styles.statsGrid}>
+              <div style={styles.statCard}>
+                <h3>NPR {formatCurrency(vendorPaymentSummary[0]?.total_delivered_amount || 0)}</h3>
+                <p>Total Delivered Amount</p>
+              </div>
+              <div style={styles.statCard}>
+                <h3>NPR {formatCurrency(vendorPaymentSummary[0]?.total_paid_amount || 0)}</h3>
+                <p>Total Paid Amount</p>
+              </div>
+              <div style={styles.statCard}>
+                <h3>NPR {formatCurrency(vendorPaymentSummary[0]?.pending_amount || 0)}</h3>
+                <p>Pending Amount</p>
+              </div>
+            </div>
+          )}
+          
+          <table style={styles.table}>
+            <thead>
+              <tr>
+                <th style={styles.th}>Date</th>
+                <th style={styles.th}>Amount Paid</th>
+                <th style={styles.th}>Notes</th>
+              </tr>
+            </thead>
+            <tbody>
+              {paymentHistory.map(payment => (
+                <tr key={payment.id}>
+                  <td style={styles.td}>{new Date(payment.created_at).toLocaleDateString()}</td>
+                  <td style={styles.td}>NPR {formatCurrency(payment.amount)}</td>
+                  <td style={styles.td}>{payment.notes || '-'}</td>
+                </tr>
+              ))}
+              {paymentHistory.length === 0 && (
+                <tr>
+                  <td colSpan="3" style={{...styles.td, textAlign: 'center', color: '#6c757d'}}>
+                    No payment history found.
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
         </div>
       )}
     </div>

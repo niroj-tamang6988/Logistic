@@ -31,6 +31,14 @@ const AdminDashboard = () => {
   const [isEditingProfile, setIsEditingProfile] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [editingParcel, setEditingParcel] = useState(null);
+  const [paymentHistory, setPaymentHistory] = useState([]);
+  const [vendorPaymentSummary, setVendorPaymentSummary] = useState([]);
+  const [showPaymentForm, setShowPaymentForm] = useState(false);
+  const [paymentForm, setPaymentForm] = useState({
+    vendor_id: '',
+    amount: '',
+    notes: ''
+  });
 
 
   useEffect(() => {
@@ -43,6 +51,10 @@ const AdminDashboard = () => {
     fetchVendorReport();
     fetchRiderReports();
     fetchProfile();
+    if (activeTab === 'payments') {
+      fetchPaymentHistory();
+      fetchVendorPaymentSummary();
+    }
 
   }, []);
 
@@ -179,16 +191,55 @@ const AdminDashboard = () => {
     }
   };
 
-  const fetchRiderDailyStatus = async (riderId) => {
+  const fetchPaymentHistory = async () => {
     try {
-      const response = await fetch(`https://logistic-backend-v3.vercel.app/api/rider-daily-status/${riderId}`, {
+      const response = await fetch('https://logistic-backend-v3.vercel.app/api/payment-history', {
         headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
       });
       const data = await response.json();
-      setRiderDailyStatus(Array.isArray(data) ? data : []);
+      setPaymentHistory(Array.isArray(data) ? data : []);
     } catch (error) {
-      console.error('Error fetching rider daily status:', error);
-      setRiderDailyStatus([]);
+      console.error('Error fetching payment history:', error);
+      setPaymentHistory([]);
+    }
+  };
+
+  const fetchVendorPaymentSummary = async () => {
+    try {
+      const response = await fetch('https://logistic-backend-v3.vercel.app/api/vendor-payment-summary', {
+        headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+      });
+      const data = await response.json();
+      setVendorPaymentSummary(Array.isArray(data) ? data : []);
+    } catch (error) {
+      console.error('Error fetching vendor payment summary:', error);
+      setVendorPaymentSummary([]);
+    }
+  };
+
+  const addPayment = async (e) => {
+    e.preventDefault();
+    try {
+      const response = await fetch('https://logistic-backend-v3.vercel.app/api/payments', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${localStorage.getItem('token')}`
+        },
+        body: JSON.stringify(paymentForm)
+      });
+      
+      if (response.ok) {
+        setPaymentForm({ vendor_id: '', amount: '', notes: '' });
+        setShowPaymentForm(false);
+        fetchPaymentHistory();
+        fetchVendorPaymentSummary();
+        showToast('Payment recorded successfully!');
+      } else {
+        showToast('Error recording payment', 'error');
+      }
+    } catch (error) {
+      showToast('Error recording payment', 'error');
     }
   };
 
@@ -323,6 +374,12 @@ const AdminDashboard = () => {
           Rider Reports
         </button>
 
+        <button 
+          onClick={() => setActiveTab('payments')} 
+          style={{...styles.button, background: activeTab === 'payments' ? '#007bff' : '#6c757d', marginRight: '1rem'}}
+        >
+          Payment History
+        </button>
         <button 
           onClick={() => setActiveTab('profile')} 
           style={{...styles.button, background: activeTab === 'profile' ? '#007bff' : '#6c757d'}}
@@ -896,6 +953,127 @@ const AdminDashboard = () => {
       )}
       
 
+      
+      {activeTab === 'payments' && (
+        <div>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
+            <h3>Payment Management</h3>
+            <button 
+              onClick={() => setShowPaymentForm(!showPaymentForm)}
+              style={{...styles.button, background: '#28a745'}}
+            >
+              {showPaymentForm ? 'Cancel' : 'Add Payment'}
+            </button>
+          </div>
+          
+          {showPaymentForm && (
+            <div style={{ background: 'white', padding: '2rem', borderRadius: '8px', boxShadow: '0 4px 12px rgba(0,0,0,0.1)', marginBottom: '2rem' }}>
+              <h4>Record Payment</h4>
+              <form onSubmit={addPayment} style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem' }}>
+                <select
+                  value={paymentForm.vendor_id}
+                  onChange={(e) => setPaymentForm({...paymentForm, vendor_id: e.target.value})}
+                  style={styles.select}
+                  required
+                >
+                  <option value="">Select Vendor</option>
+                  {users.filter(u => u.role === 'vendor').map(user => (
+                    <option key={user.id} value={user.id}>{user.name}</option>
+                  ))}
+                </select>
+                
+                <input
+                  type="number"
+                  step="0.01"
+                  placeholder="Payment Amount (NPR)"
+                  value={paymentForm.amount}
+                  onChange={(e) => setPaymentForm({...paymentForm, amount: e.target.value})}
+                  style={styles.select}
+                  required
+                />
+                
+                <textarea
+                  placeholder="Notes (optional)"
+                  value={paymentForm.notes}
+                  onChange={(e) => setPaymentForm({...paymentForm, notes: e.target.value})}
+                  style={{...styles.select, gridColumn: 'span 2', minHeight: '60px'}}
+                />
+                
+                <button type="submit" style={{...styles.button, background: '#28a745'}}>
+                  Record Payment
+                </button>
+              </form>
+            </div>
+          )}
+          
+          <h4>Vendor Payment Summary</h4>
+          <table style={styles.table}>
+            <thead>
+              <tr>
+                <th style={styles.th}>Vendor</th>
+                <th style={styles.th}>Total Delivered</th>
+                <th style={styles.th}>Total Paid</th>
+                <th style={styles.th}>Pending Amount</th>
+              </tr>
+            </thead>
+            <tbody>
+              {vendorPaymentSummary.map(vendor => (
+                <tr key={vendor.vendor_id}>
+                  <td style={styles.td}>{vendor.vendor_name}</td>
+                  <td style={styles.td}>NPR {formatCurrency(vendor.total_delivered_amount)}</td>
+                  <td style={styles.td}>NPR {formatCurrency(vendor.total_paid_amount)}</td>
+                  <td style={styles.td}>
+                    <span style={{
+                      padding: '0.25rem 0.5rem',
+                      borderRadius: '4px',
+                      background: parseFloat(vendor.pending_amount) > 0 ? '#f8d7da' : '#d4edda',
+                      color: parseFloat(vendor.pending_amount) > 0 ? '#721c24' : '#155724'
+                    }}>
+                      NPR {formatCurrency(vendor.pending_amount)}
+                    </span>
+                  </td>
+                </tr>
+              ))}
+              {vendorPaymentSummary.length === 0 && (
+                <tr>
+                  <td colSpan="4" style={{...styles.td, textAlign: 'center', color: '#6c757d'}}>
+                    No vendor data found.
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+          
+          <h4 style={{ marginTop: '2rem' }}>Payment History</h4>
+          <table style={styles.table}>
+            <thead>
+              <tr>
+                <th style={styles.th}>Date</th>
+                <th style={styles.th}>Vendor</th>
+                <th style={styles.th}>Amount</th>
+                <th style={styles.th}>Notes</th>
+              </tr>
+            </thead>
+            <tbody>
+              {paymentHistory.map(payment => (
+                <tr key={payment.id}>
+                  <td style={styles.td}>{new Date(payment.created_at).toLocaleDateString()}</td>
+                  <td style={styles.td}>{payment.vendor_name}</td>
+                  <td style={styles.td}>NPR {formatCurrency(payment.amount)}</td>
+                  <td style={styles.td}>{payment.notes || '-'}</td>
+                </tr>
+              ))}
+              {paymentHistory.length === 0 && (
+                <tr>
+                  <td colSpan="4" style={{...styles.td, textAlign: 'center', color: '#6c757d'}}>
+                    No payment history found.
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+      )}
       
       {activeTab === 'profile' && (
         <div style={{ background: 'white', padding: '2rem', borderRadius: '8px', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}>
