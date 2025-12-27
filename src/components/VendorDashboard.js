@@ -30,6 +30,13 @@ const VendorDashboard = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [paymentHistory, setPaymentHistory] = useState([]);
   const [vendorPaymentSummary, setVendorPaymentSummary] = useState([]);
+  const [editingParcel, setEditingParcel] = useState(null);
+  const [editForm, setEditForm] = useState({
+    recipient_name: '',
+    recipient_address: '',
+    recipient_phone: '',
+    cod_amount: ''
+  });
 
   useEffect(() => {
     fetchParcels();
@@ -161,6 +168,67 @@ const VendorDashboard = () => {
     } catch (error) {
       showToast('Error placing parcel', 'error');
     }
+  };
+
+  const editParcel = async (e) => {
+    e.preventDefault();
+    try {
+      const response = await fetch(`https://logistic-backend-v3.vercel.app/api/parcels/${editingParcel}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${localStorage.getItem('token')}`
+        },
+        body: JSON.stringify(editForm)
+      });
+      
+      if (response.ok) {
+        setEditingParcel(null);
+        setEditForm({ recipient_name: '', recipient_address: '', recipient_phone: '', cod_amount: '' });
+        fetchParcels();
+        fetchStats();
+        fetchFinancialData();
+        fetchDailyFinancialData();
+        showToast('Parcel updated successfully!');
+      } else {
+        showToast('Error updating parcel', 'error');
+      }
+    } catch (error) {
+      showToast('Error updating parcel', 'error');
+    }
+  };
+
+  const deleteParcel = async (parcelId) => {
+    if (!window.confirm('Are you sure you want to delete this parcel?')) return;
+    
+    try {
+      const response = await fetch(`https://logistic-backend-v3.vercel.app/api/parcels/${parcelId}`, {
+        method: 'DELETE',
+        headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+      });
+      
+      if (response.ok) {
+        fetchParcels();
+        fetchStats();
+        fetchFinancialData();
+        fetchDailyFinancialData();
+        showToast('Parcel deleted successfully!');
+      } else {
+        showToast('Error deleting parcel', 'error');
+      }
+    } catch (error) {
+      showToast('Error deleting parcel', 'error');
+    }
+  };
+
+  const startEdit = (parcel) => {
+    setEditingParcel(parcel.id);
+    setEditForm({
+      recipient_name: parcel.recipient_name,
+      recipient_address: parcel.address,
+      recipient_phone: parcel.recipient_phone,
+      cod_amount: parcel.cod_amount
+    });
   };
 
   const getStatCount = (status) => {
@@ -347,6 +415,7 @@ const VendorDashboard = () => {
                     <th style={styles.th}>Status</th>
                     <th style={styles.th}>Rider</th>
                     <th style={styles.th}>Comment</th>
+                    <th style={styles.th}>Actions</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -378,6 +447,69 @@ const VendorDashboard = () => {
                       </td>
                       <td style={styles.td}>{parcel.rider_name || 'Not assigned'}</td>
                       <td style={styles.td}>{parcel.rider_comment || '-'}</td>
+                      <td style={styles.td}>
+                        {editingParcel === parcel.id ? (
+                          <div style={{ display: 'flex', gap: '0.5rem', flexDirection: 'column' }}>
+                            <form onSubmit={editParcel} style={{ display: 'flex', gap: '0.5rem', flexDirection: 'column' }}>
+                              <input
+                                type="text"
+                                value={editForm.recipient_name}
+                                onChange={(e) => setEditForm({...editForm, recipient_name: e.target.value})}
+                                style={{...styles.input, margin: 0, padding: '0.5rem'}}
+                                placeholder="Recipient Name"
+                                required
+                              />
+                              <textarea
+                                value={editForm.recipient_address}
+                                onChange={(e) => setEditForm({...editForm, recipient_address: e.target.value})}
+                                style={{...styles.input, margin: 0, padding: '0.5rem', minHeight: '60px'}}
+                                placeholder="Address"
+                                required
+                              />
+                              <input
+                                type="tel"
+                                value={editForm.recipient_phone}
+                                onChange={(e) => setEditForm({...editForm, recipient_phone: e.target.value})}
+                                style={{...styles.input, margin: 0, padding: '0.5rem'}}
+                                placeholder="Phone"
+                                required
+                              />
+                              <input
+                                type="number"
+                                value={editForm.cod_amount}
+                                onChange={(e) => setEditForm({...editForm, cod_amount: e.target.value})}
+                                style={{...styles.input, margin: 0, padding: '0.5rem'}}
+                                placeholder="COD Amount"
+                                min="0"
+                                step="0.01"
+                              />
+                              <div style={{ display: 'flex', gap: '0.5rem' }}>
+                                <button type="submit" style={{...styles.button, background: '#28a745', margin: 0, padding: '0.5rem'}}>Save</button>
+                                <button type="button" onClick={() => setEditingParcel(null)} style={{...styles.button, background: '#6c757d', margin: 0, padding: '0.5rem'}}>Cancel</button>
+                              </div>
+                            </form>
+                          </div>
+                        ) : (
+                          <div style={{ display: 'flex', gap: '0.5rem' }}>
+                            {parcel.status === 'pending' && (
+                              <>
+                                <button 
+                                  onClick={() => startEdit(parcel)}
+                                  style={{...styles.button, background: '#007bff', margin: 0, padding: '0.5rem'}}
+                                >
+                                  Edit
+                                </button>
+                                <button 
+                                  onClick={() => deleteParcel(parcel.id)}
+                                  style={{...styles.button, background: '#dc3545', margin: 0, padding: '0.5rem'}}
+                                >
+                                  Delete
+                                </button>
+                              </>
+                            )}
+                          </div>
+                        )}
+                      </td>
                     </tr>
                   ))}
                 </tbody>
