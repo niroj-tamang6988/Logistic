@@ -243,6 +243,19 @@ const AdminDashboard = () => {
     }
   };
 
+  const fetchRiderDailyStatus = async (riderId) => {
+    try {
+      const response = await fetch(`https://logistic-backend-v3.vercel.app/api/rider-daily-status/${riderId}`, {
+        headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+      });
+      const data = await response.json();
+      setRiderDailyStatus(Array.isArray(data) ? data : []);
+    } catch (error) {
+      console.error('Error fetching rider daily status:', error);
+      setRiderDailyStatus([]);
+    }
+  };
+
   const deleteUser = async (userId) => {
     if (!window.confirm('Are you sure you want to delete this user?')) return;
     
