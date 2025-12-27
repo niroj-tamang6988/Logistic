@@ -39,6 +39,11 @@ const AdminDashboard = () => {
     amount: '',
     notes: ''
   });
+  const [editingPayment, setEditingPayment] = useState(null);
+  const [editPaymentForm, setEditPaymentForm] = useState({
+    amount: '',
+    notes: ''
+  });
 
 
   useEffect(() => {
@@ -243,6 +248,53 @@ const AdminDashboard = () => {
       }
     } catch (error) {
       showToast('Error recording payment', 'error');
+    }
+  };
+
+  const updatePayment = async (e) => {
+    e.preventDefault();
+    try {
+      const response = await fetch(`https://logistic-backend-v3.vercel.app/api/payments/${editingPayment}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${localStorage.getItem('token')}`
+        },
+        body: JSON.stringify(editPaymentForm)
+      });
+      
+      if (response.ok) {
+        setEditingPayment(null);
+        setEditPaymentForm({ amount: '', notes: '' });
+        fetchPaymentHistory();
+        fetchVendorPaymentSummary();
+        showToast('Payment updated successfully!');
+      } else {
+        showToast('Error updating payment', 'error');
+      }
+    } catch (error) {
+      showToast('Error updating payment', 'error');
+    }
+  };
+
+  const deletePayment = async (paymentId) => {
+    if (!window.confirm('Are you sure you want to delete this payment record?')) return;
+    
+    try {
+      const response = await fetch(`https://logistic-backend-v3.vercel.app/api/payments/${paymentId}`, {
+        method: 'DELETE',
+        headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+      });
+      
+      if (response.ok) {
+        fetchPaymentHistory();
+        fetchVendorPaymentSummary();
+        showToast('Payment deleted successfully!');
+      } else {
+        showToast('Error deleting payment', 'error');
+      }
+    } catch (error) {
+      showToast('Error deleting payment', 'error');
     }
   };
 
@@ -1070,6 +1122,7 @@ const AdminDashboard = () => {
                 <th style={styles.th}>Vendor</th>
                 <th style={styles.th}>Amount</th>
                 <th style={styles.th}>Notes</th>
+                <th style={styles.th}>Actions</th>
               </tr>
             </thead>
             <tbody>
@@ -1077,13 +1130,75 @@ const AdminDashboard = () => {
                 <tr key={payment.id}>
                   <td style={styles.td}>{new Date(payment.created_at).toLocaleDateString()}</td>
                   <td style={styles.td}>{payment.vendor_name}</td>
-                  <td style={styles.td}>NPR {formatCurrency(payment.amount)}</td>
-                  <td style={styles.td}>{payment.notes || '-'}</td>
+                  <td style={styles.td}>
+                    {editingPayment === payment.id ? (
+                      <input
+                        type="number"
+                        step="0.01"
+                        value={editPaymentForm.amount}
+                        onChange={(e) => setEditPaymentForm({...editPaymentForm, amount: e.target.value})}
+                        style={{...styles.select, width: '100px'}}
+                      />
+                    ) : (
+                      `NPR ${formatCurrency(payment.amount)}`
+                    )}
+                  </td>
+                  <td style={styles.td}>
+                    {editingPayment === payment.id ? (
+                      <input
+                        type="text"
+                        value={editPaymentForm.notes}
+                        onChange={(e) => setEditPaymentForm({...editPaymentForm, notes: e.target.value})}
+                        style={{...styles.select, width: '150px'}}
+                      />
+                    ) : (
+                      payment.notes || '-'
+                    )}
+                  </td>
+                  <td style={styles.td}>
+                    {editingPayment === payment.id ? (
+                      <div style={{ display: 'flex', gap: '0.5rem' }}>
+                        <button 
+                          onClick={updatePayment}
+                          style={{...styles.select, background: '#28a745', color: 'white', border: 'none', cursor: 'pointer', padding: '0.25rem 0.5rem'}}
+                        >
+                          Save
+                        </button>
+                        <button 
+                          onClick={() => {
+                            setEditingPayment(null);
+                            setEditPaymentForm({ amount: '', notes: '' });
+                          }}
+                          style={{...styles.select, background: '#6c757d', color: 'white', border: 'none', cursor: 'pointer', padding: '0.25rem 0.5rem'}}
+                        >
+                          Cancel
+                        </button>
+                      </div>
+                    ) : (
+                      <div style={{ display: 'flex', gap: '0.5rem' }}>
+                        <button 
+                          onClick={() => {
+                            setEditingPayment(payment.id);
+                            setEditPaymentForm({ amount: payment.amount, notes: payment.notes || '' });
+                          }}
+                          style={{...styles.select, background: '#007bff', color: 'white', border: 'none', cursor: 'pointer', padding: '0.25rem 0.5rem'}}
+                        >
+                          Edit
+                        </button>
+                        <button 
+                          onClick={() => deletePayment(payment.id)}
+                          style={{...styles.select, background: '#dc3545', color: 'white', border: 'none', cursor: 'pointer', padding: '0.25rem 0.5rem'}}
+                        >
+                          Delete
+                        </button>
+                      </div>
+                    )}
+                  </td>
                 </tr>
               ))}
               {paymentHistory.length === 0 && (
                 <tr>
-                  <td colSpan="4" style={{...styles.td, textAlign: 'center', color: '#6c757d'}}>
+                  <td colSpan="5" style={{...styles.td, textAlign: 'center', color: '#6c757d'}}>
                     No payment history found.
                   </td>
                 </tr>
