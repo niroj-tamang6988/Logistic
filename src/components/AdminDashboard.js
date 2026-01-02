@@ -1081,6 +1081,7 @@ const AdminDashboard = () => {
                 <th style={styles.th}>Vendor</th>
                 <th style={styles.th}>Total Parcels</th>
                 <th style={styles.th}>Total Delivered</th>
+                <th style={styles.th}>Parcel Charges</th>
                 <th style={styles.th}>Total Paid</th>
                 <th style={styles.th}>Pending Amount</th>
               </tr>
@@ -1091,6 +1092,7 @@ const AdminDashboard = () => {
                   <td style={styles.td}>{vendor.vendor_name}</td>
                   <td style={styles.td}>{vendor.total_parcels || 0}</td>
                   <td style={styles.td}>NPR {formatCurrency(vendor.total_delivered_amount)}</td>
+                  <td style={styles.td}>NPR {formatCurrency(vendor.total_parcel_charges || 0)}</td>
                   <td style={styles.td}>NPR {formatCurrency(vendor.total_paid_amount)}</td>
                   <td style={styles.td}>
                     <span style={{
@@ -1106,7 +1108,7 @@ const AdminDashboard = () => {
               ))}
               {vendorPaymentSummary.length === 0 && (
                 <tr>
-                  <td colSpan="5" style={{...styles.td, textAlign: 'center', color: '#6c757d'}}>
+                  <td colSpan="6" style={{...styles.td, textAlign: 'center', color: '#6c757d'}}>
                     No vendor data found.
                   </td>
                 </tr>
