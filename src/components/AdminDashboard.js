@@ -562,7 +562,6 @@ const AdminDashboard = () => {
                 <thead>
                   <tr>
                     <th style={styles.th}>ID</th>
-                    <th style={styles.th}>Time</th>
                     <th style={styles.th}>Vendor</th>
                     <th style={styles.th}>Recipient</th>
                     <th style={styles.th}>Address</th>
@@ -578,13 +577,6 @@ const AdminDashboard = () => {
                   {dateParcels.map(parcel => (
                     <tr key={parcel.id}>
                       <td style={styles.td}>{parcel.id}</td>
-                      <td style={styles.td}>
-                        {new Date(parcel.created_at).toLocaleTimeString('en-US', { 
-                          hour: '2-digit', 
-                          minute: '2-digit',
-                          hour12: true 
-                        })}
-                      </td>
                       <td style={styles.td}>{parcel.vendor_name}</td>
                       <td style={styles.td}>{parcel.recipient_name}</td>
                       <td style={styles.td}>{parcel.address}</td>
