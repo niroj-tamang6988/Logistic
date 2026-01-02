@@ -790,6 +790,7 @@ const AdminDashboard = () => {
               }, {})
             ).map(([date, vendors]) => {
               const dateTotal = vendors.reduce((sum, v) => sum + parseFloat(v.total_cod || 0), 0);
+              const deliveredTotal = vendors.reduce((sum, v) => v.status === 'delivered' ? sum + parseFloat(v.total_cod || 0) : sum, 0);
               const parcelTotal = vendors.reduce((sum, v) => sum + parseInt(v.count || 0), 0);
               return (
                 <div key={date} style={{ marginBottom: '2rem' }}>
@@ -797,7 +798,8 @@ const AdminDashboard = () => {
                     <h4>{date !== 'No Date' ? new Date(date).toLocaleDateString() : 'No Date'}</h4>
                     <div>
                       <span style={{ marginRight: '2rem' }}>Total Parcels: {parcelTotal}</span>
-                      <span>Total COD: NPR {formatCurrency(dateTotal)}</span>
+                      <span style={{ marginRight: '2rem' }}>Total COD: NPR {formatCurrency(dateTotal)}</span>
+                      <span>Delivered: NPR {formatCurrency(deliveredTotal)}</span>
                     </div>
                   </div>
                   <table style={{...styles.table, marginTop: 0, borderRadius: '0 0 8px 8px'}}>

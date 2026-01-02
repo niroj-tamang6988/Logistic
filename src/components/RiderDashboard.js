@@ -394,6 +394,7 @@ const RiderDashboard = () => {
         Object.entries(parcels).map(([date, dateParcels]) => {
           const parcelCount = dateParcels.length;
           const totalCOD = dateParcels.reduce((sum, p) => sum + parseFloat(p.cod_amount || 0), 0);
+          const deliveredCOD = dateParcels.filter(p => p.status === 'delivered').reduce((sum, p) => sum + parseFloat(p.cod_amount || 0), 0);
           
           return (
             <div key={date} style={{ marginBottom: '2rem' }}>
@@ -410,6 +411,7 @@ const RiderDashboard = () => {
                 <div style={{ display: 'flex', gap: '2rem' }}>
                   <span>Parcels: {parcelCount}</span>
                   <span>Total COD: NPR {formatCurrency(totalCOD)}</span>
+                  <span>Delivered: NPR {formatCurrency(deliveredCOD)}</span>
                 </div>
               </div>
               
