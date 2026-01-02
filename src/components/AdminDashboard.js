@@ -389,6 +389,32 @@ const AdminDashboard = () => {
     }
   };
 
+  const returnParcel = async (parcelId) => {
+    const reason = window.prompt('Enter return reason:');
+    if (!reason) return;
+    
+    try {
+      const response = await fetch(`https://logistic-backend-v3.vercel.app/api/parcels/${parcelId}/return`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${localStorage.getItem('token')}`
+        },
+        body: JSON.stringify({ return_reason: reason })
+      });
+      
+      if (response.ok) {
+        fetchParcels(searchTerm);
+        fetchStats();
+        showToast('Parcel marked as returned!');
+      } else {
+        showToast('Error returning parcel', 'error');
+      }
+    } catch (error) {
+      showToast('Error returning parcel', 'error');
+    }
+  };
+
   const getStatCount = (status) => {
     const stat = stats.find(s => s.status === status);
     return stat ? stat.count : 0;
@@ -458,7 +484,7 @@ const AdminDashboard = () => {
       
       <div style={styles.statsGrid}>
         <div style={styles.statCard}>
-          <h3>{getStatCount('pending') + getStatCount('assigned') + getStatCount('delivered') + getStatCount('not_delivered')}</h3>
+          <h3>{getStatCount('pending') + getStatCount('assigned') + getStatCount('delivered') + getStatCount('not_delivered') + getStatCount('returned')}</h3>
           <p>Total Parcels</p>
         </div>
         <div style={styles.statCard}>
@@ -472,6 +498,10 @@ const AdminDashboard = () => {
         <div style={styles.statCard}>
           <h3>{getStatCount('delivered')}</h3>
           <p>Delivered</p>
+        </div>
+        <div style={styles.statCard}>
+          <h3>{getStatCount('returned')}</h3>
+          <p>Returned</p>
         </div>
       </div>
 
@@ -565,9 +595,11 @@ const AdminDashboard = () => {
                           padding: '0.25rem 0.5rem',
                           borderRadius: '4px',
                           background: parcel.status === 'delivered' ? '#d4edda' : 
-                                    parcel.status === 'not_delivered' ? '#f8d7da' : '#fff3cd',
+                                    parcel.status === 'not_delivered' ? '#f8d7da' : 
+                                    parcel.status === 'returned' ? '#e2e3e5' : '#fff3cd',
                           color: parcel.status === 'delivered' ? '#155724' : 
-                                 parcel.status === 'not_delivered' ? '#721c24' : '#856404'
+                                 parcel.status === 'not_delivered' ? '#721c24' : 
+                                 parcel.status === 'returned' ? '#383d41' : '#856404'
                         }}>
                           {parcel.status}
                         </span>
@@ -615,9 +647,17 @@ const AdminDashboard = () => {
                             {(parcel.status === 'assigned' || parcel.status === 'delivered' || parcel.status === 'not_delivered') && (
                               <button 
                                 onClick={() => setEditingParcel(parcel.id)}
-                                style={{...styles.select, background: '#007bff', color: 'white', border: 'none', cursor: 'pointer'}}
+                                style={{...styles.select, background: '#007bff', color: 'white', border: 'none', cursor: 'pointer', marginRight: '0.5rem'}}
                               >
                                 Edit
+                              </button>
+                            )}
+                            {parcel.status === 'not_delivered' && (
+                              <button 
+                                onClick={() => returnParcel(parcel.id)}
+                                style={{...styles.select, background: '#6c757d', color: 'white', border: 'none', cursor: 'pointer'}}
+                              >
+                                Return
                               </button>
                             )}
                           </div>
